@@ -1,0 +1,44 @@
+MMI-KXC20.82-16 for Moto E (“Condor”) 
+
+Gits published with tag MMI-KXC20.82-16: (4.4.2 Launch version)
+=============================================================
+
+bionic
+external/chromium_org
+external/clang
+external/compiler-rt
+external/dnsmasq
+external/gcc-demangle
+external/hyphenation
+external/iproute2
+external/iptables
+external/jdiff
+external/libcap-ng
+external/libnl-headers
+kernel
+motorola/external/f2fs-tools
+motorola/external/wbxmlparser
+motorola/security/moto_crypto
+system/core
+vendor/qcom/opensource/wlan/prima
+
+Sample Usage:
+=============
+
+1. Create a workspace containing “vanilla” KitKat release from Google.
+
+2. Replace the Android repos corresponding to the Motorola-published repos.
+
+3. Building kernel and kernel modules:
+
+my_top_dir=$PWD
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+cat kernel/arch/arm/configs/msm8610_defconfig kernel/arch/arm/configs/ext_config/debug-msm8610.config > $kernel_out_dir/mapphone_defconfig
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir defoldconfig
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir headers_install
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir dtbs
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir modules
+make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir INSTALL_MOD_PATH=$PWD/out/target/product/generic modules_install
