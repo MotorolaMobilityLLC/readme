@@ -1,4 +1,4 @@
-MMI-LXI22.50-24.1/MMI-LXI22.50-13.4 for Styx-LTE (â~@~\Moto Eâ~@~]) Retail/Developer edition
+MMI-LXI22.50-24.1/MMI-LXI22.50-13.4/MMI-LXI22.50-14.8.txt for Styx-LTE (â~@~\Moto Eâ~@~]) Retail/Developer edition
 
 Gits published with tag MMI-LXI22.50-24.1: (5.0.2 Launch version)
 =============================================================
