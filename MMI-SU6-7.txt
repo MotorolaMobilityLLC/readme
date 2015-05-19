@@ -1,0 +1,50 @@
+MMI-SU6-7 for Droid Ultra (â~@~\Ultraâ~@~]) 
+
+Gits published with tag MMI-SU6-7: (4.4.4 Launch version)
+=============================================================
+*vendor-qcom-opensource-wlan-prima
+* system-core
+* motorola-security-moto_crypto
+* motorola-external-wbxmlparser
+* motorola-external-f2fs-tools
+* kernel-msm
+* external-libnl-headers
+* external-libcap-ng
+* external-jdiff
+* external-iptables
+* external-iproute2
+* external-hyphenation
+* external-gcc-demangle
+* external-dnsmasq
+* external-compiler-rt
+* external-clang
+* external-chromium_org
+* bionic
+
+Sample Usage:
+=============
+
+1. Create a workspace containing â~@~\vanillaâ~@~] KitKat release from Google.
+
+2. Replace the Android repos corresponding to the Motorola-published repos.
+
+3. Building kernel and kernel modules:
+
+my_top_dir=$PWD
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cat kernel/arch/arm/configs/msm8960_defconfig  > $kernel_out_dir/mapphone_defconfig
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir defoldconfig
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir headers_install
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir dtbs
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir modules
+make  -C kernel ARCH=arm  CROSS_COMPILE=$cross  O=$kernel_out_dir INSTALL_MOD_PATH=$PWD/out/target/product/generic modules_install
+
+4. Build wlan driver:
+
+    cd $PWD/out/target/product/generic/obj
+    make -C kernel M=$my_top_dir/vendor/qcom/opensource/wlan/prima O=$kernelout ARCH=arm CROSS_COMPILE=$cross modules WLAN_ROOT=$my_top_dir/vendor/qcom/opensource/wlan/prima MODNAME=wlan BOARD_PLATFORM=msm8960 CONFIG_PRIMA_WLAN=m
