@@ -4,7 +4,12 @@ MMI-LPH23.116-18.1 for Moto X (Gen3)
 
 Kernel Modules:
 ---------------
-Rename kernel-msm folder to kernel
+Rename kernel-msm folder to $my_top_dir/kernel
+Download motorola-kernel repo. 
+mkdir $my_top_dir/motorola
+mv motorola-kernel $my_top_dir/motorola/kernel
+Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/ motorola/kernel/fs/f2fs/ folder
+
 mkdir -p $PWD/out/target/product/generic/obj/kernel
 cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8/bin/aarch64-linux-android-
 kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
