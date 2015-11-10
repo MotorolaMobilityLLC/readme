@@ -15,7 +15,7 @@ mv motorola-kernel $my_top_dir/motorola/kernel
 Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/ motorola/kernel/fs/f2fs/ folder
 
 mkdir -p $PWD/out/target/product/generic/obj/kernel
-cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8/bin/aarch64-linux-android-
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/aarch64-linux-android-4.8/bin/aarch64-linux-android-
 kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
 cat kernel/arch/arm64/configs/msm8994-perf_defconfig > $kernel_out_dir/mapphone_defconfig
 cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
