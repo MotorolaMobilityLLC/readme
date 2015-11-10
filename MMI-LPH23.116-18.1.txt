@@ -5,6 +5,7 @@ MMI-LPH23.116-18.1 for Moto X (Gen3)
 Kernel Modules:
 ---------------
 Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.8
 Rename kernel-msm folder to $my_top_dir/kernel
 Download motorola-kernel repo. 
 mkdir $my_top_dir/motorola
