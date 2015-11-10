@@ -7,7 +7,7 @@ Kernel Modules:
 mkdir -p $PWD/out/target/product/generic/obj/kernel
 cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8/bin/aarch64-linux-android-
 kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
-cat kernel/arch/arm64/configs/msm8994-perf_defconfig > $kernel_out_dir/mapphone_defconfig
+cat kernel-msm/arch/arm64/configs/msm8994-perf_defconfig > $kernel_out_dir/mapphone_defconfig
 cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
 make -j32 -C kernel ARCH=arm64 CROSS_COMPILE=$cross O=$kernel_out_dir KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android defoldconfig
 make -j32 -C kernel ARCH=arm64 CROSS_COMPILE=$cross O=$kernel_out_dir KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
