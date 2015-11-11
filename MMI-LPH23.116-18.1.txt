@@ -6,8 +6,10 @@ Kernel Modules:
 ---------------
 Download prebuilts folder from Android distribution. Move it to $my_top_dir
 For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
 mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
 mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
 Rename kernel-msm folder to $my_top_dir/kernel
 Download motorola-kernel repo. 
 mkdir $my_top_dir/motorola
