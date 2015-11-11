@@ -5,9 +5,9 @@ MMI-LPH23.116-18.1 for Moto X (Gen3)
 Kernel Modules:
 ---------------
 Download prebuilts folder from Android distribution. Move it to $my_top_dir
-For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.8
-mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm/
-mv aarch64-linux-android-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
 Rename kernel-msm folder to $my_top_dir/kernel
 Download motorola-kernel repo. 
 mkdir $my_top_dir/motorola
@@ -15,9 +15,9 @@ mv motorola-kernel $my_top_dir/motorola/kernel
 Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/ motorola/kernel/fs/f2fs/ folder
 
 mkdir -p $PWD/out/target/product/generic/obj/kernel
-cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/aarch64-linux-android-4.8/bin/aarch64-linux-android-
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
 kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
-cat kernel/arch/arm64/configs/msm8994-perf_defconfig > $kernel_out_dir/mapphone_defconfig
+( perl -le 'print "# This file was automatically generated from:\n#\t" . join("\n#\t", @ARGV) . "\n"' kernel/arch/arm64/configs/msm8994-perf_defconfig kernel/arch/arm64/configs/ext_config/debug-msm8994.config kernel/arch/arm64/configs/ext_config/debug-clark.config && cat kernel/arch/arm64/configs/msm8994-perf_defconfig kernel/arch/arm64/configs/ext_config/debug-msm8994.config kernel/arch/arm64/configs/ext_config/debug-clark.config ) > $kernel_out_dir/mapphone_defconfig
 cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
 make -j32 -C kernel ARCH=arm64 CROSS_COMPILE=$cross O=$kernel_out_dir KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android defoldconfig
 make -j32 -C kernel ARCH=arm64 CROSS_COMPILE=$cross O=$kernel_out_dir KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
