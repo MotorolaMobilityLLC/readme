@@ -1,0 +1,37 @@
+MMI-MPI24.65-39 for Moto E (Gen2)
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+
+Rename kernel-msm folder to $my_top_dir/kernel
+Download motorola-kernel repo.
+mkdir $my_top_dir/motorola
+mv motorola-kernel $my_top_dir/motorola/kernel
+Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/ motorola/kernel/fs/f2fs/ folder
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+mkdir -p $PWD/out/target/product/generic/obj/bootloader
+bootloader_out_dir=$PWD/out/target/product/generic/obj/bootloader
+
+( perl -le 'print "# This file was automatically generated from:\n#\t" . join("\n#\t", @ARGV) . "\n"' kernel/arch/arm/configs/msm8916-perf_defconfig && cat kernel/arch/arm/configs/msm8916-perf_defconfig ) > $kernel_out_dir/mapphone_defconfig
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules
+make -C kernel O=$kernel_out_dir INSTALL_MOD_PATH=$kernel_out_dir/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+WLAN Driver:
+------------
+cd $PWD/out/target/product/generic/obj
+make -C kernel M=$my_top_dir/vendor/qcom/opensource/wlan/prima O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross modules WLAN_ROOT=$my_top_dir/vendor/qcom/opensource/wlan/prima MODNAME=wlan BOARD_PLATFORM=msm8916 CONFIG_PRONTO_WLAN=m
