@@ -1,0 +1,26 @@
+MMI-XT1706-S131-160905 for MOTO E3
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p $my_top_dir/prebuilts/gcc/linux-x86/arm
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+Rename kernel-3.18 folder to $my_top_dir/kernel
+
+Download vendor-lenovo-exfat repo.
+mkdir -p $my_top_dir/vendor/lenovo
+mv exfat $my_top_dir/vendor/lenovo/.
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+
+#cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= taido_row_defconfig
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= zImage-dtb
+
