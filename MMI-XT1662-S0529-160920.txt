@@ -13,19 +13,19 @@ Download  kernel
 Rename kernel folder to $my_top_dir/kernel
 
 Download vendor-lenovo-exfat repo.
-Download vendor-lenovo-sdcards repo.
+Download vendor-lenovo-sdcardfs repo.
 Download motorola-kernel repo.
 
 mkdir -p $my_top_dir/vendor/lenovo/exfat
-mkdir -p $my_top_dir/vendor/lenovo/sdcards
+mkdir -p $my_top_dir/vendor/lenovo/sdcardfs
 mkdir -p $my_top_dir/motorola/kernel/
 
 mv  vendor-lenovo-exfat $my_top_dir/vendor/lenovo/exfat
-mv  vendor-lenovo-sdcards $my_top_dir/vendor/lenovo/sdcards
+mv  vendor-lenovo-sdcardfs $my_top_dir/vendor/lenovo/sdcardfs
 mv  motorola-kernel-fs-f2fs $my_top_dir/motorola/kernel
 
 Check if $my_top_dir/kernel/fs/exfat points to the $my_top_dir/vendor/lenovo/exfat folder
-Check if $my_top_dir/kernel/fs/sdcards points to the $my_top_dir/vendor/lenovo/sdcards folder
+Check if $my_top_dir/kernel/fs/sdcardfs points to the $my_top_dir/vendor/lenovo/sdcardfs folder
 Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/motorola/kernel/fs/f2fs folder
 Check if $my_top_dir/kernel/include/linux/f2fs  points to $my_top_dir/motorola/kernel/include/linux/f2fs 
 
