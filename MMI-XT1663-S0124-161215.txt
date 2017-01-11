@@ -1,0 +1,44 @@
+MMI-XT1663-S0124-161215 for MOTO M
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/darwin-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+
+Download kernel
+Rename kernel-3.18 folder to $my_top_dir/kernel
+
+
+Download vendor-lenovo-exfat repo.
+Download verdor-lenovo-sdcardfs repo.
+
+mkdir -p $my_top_dir/vendor/lenovo/
+mv vendor-lenovo-exfat $my_top_dir/vendor/lenovo/.
+mv verdor-lenovo-sdcardfs $my_top_dir/vendor/lenovo/.
+
+
+Download motorola-kernel repo.
+
+mkdir $my_top_dir/motorola
+mv motorola-kernel $my_top_dir/motorola/. 
+
+Check if $my_top_dir/kernel/fs/exfat points to the $my_top_dir/vendor/lenovo/exfat folder
+Check if $my_top_dir/kernel/fs/sdcardfs points to the $my_top_dir/vendor/lenovo/sdcardfs folder
+Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/motorola/kernel/fs/f2fs folder
+
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+#cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= kungfu_m_defconfig
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= Image.gz-dtb
+
+
