@@ -1,0 +1,47 @@
+NPL25.86-15 For Moto Z Force
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+Download kernel-msm repo
+Rename kernel-msm folder to $my_top_dir/kernel
+
+Download motorola-kernel repo
+mkdir -p $my_top_dir/motorola
+mv motorola-kernel $my_top_dir/motorola/kernel
+Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/motorola/kernel/fs/f2fs/ folder
+
+Download motorola-external-greybus repo
+mkdir -p $my_top_dir/motorola/external
+mv motorola-external-greybus greybus
+mv greybus $my_top_dir/motorola/external/.
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+perl -le 'print \"# This file was automatically generated from:\\n#\\t\" . join(\"\\n#\\t\", @ARGV) . \"\\n\"' kernel/arch/arm64/configs/msm-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-msm.config kernel/arch/arm64/configs/ext_config/debug-msm.config kernel/arch/arm64/configs/ext_config/msm8996-lite.config kernel/arch/arm64/configs/ext_config/moto-camera-griffin.config && cat kernel/arch/arm64/configs/msm-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-msm.config kernel/arch/arm64/configs/ext_config/debug-msm.config kernel/arch/arm64/configs/ext_config/msm8996-lite.config kernel/arch/arm64/configs/ext_config/moto-camera-griffin.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android 
+
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
+
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
+
+make -j16 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+make -C motorola/external/greybus CROSS_COMPILE=$cross KERNELDIR=$kernel_out_dir ARCH=arm64 EXTRA_CFLAGS+=-fno-pic
+
+
+WLAN Driver:
+------------
+make -C kernel M=../vendor/qcom/opensource/wlan/qcacld-2.0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KCFLAGS=-mno-android modules WLAN_ROOT=../vendor/qcom/opensource/wlan/qcacld-2.0 MODNAME=wlan BOARD_PLATFORM=msm8996 CONFIG_QCA_CLD_WLAN=m WLAN_OPEN_SOURCE=1
