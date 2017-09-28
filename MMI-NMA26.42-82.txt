@@ -1,0 +1,27 @@
+MMI-NMA26.42-82 For Moto E Plus
+
+Kernel Modules:
+---------------
+Download prebuilt git repo: cit-arm-eabi-4.8
+
+Download kernel git repo: kernel-mtk
+
+mkdir -p $PWD/prebuilts/gcc/linux-x86/arm
+
+mv cit-arm-eabi-4.8 $PWD/prebuilts/gcc/linux-x86/arm/.
+
+mv kernel-mtk $PWD/kernel
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel/
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel/
+
+cross=$PWD/prebuilts/gcc/linux-x86/arm/cit-arm-eabi-4.8/bin/arm-eabi-
+
+make -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPLE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= nicklaus_defconfig
+
+make -C kernel KBUILD_RELSRC=kernel O=$kernel_out_dir ARCH=arm CROSS_COMPLE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+
+make -C kernel KBUILD_RELSRC=kernel O=$kernel_out_dir ARCH=arm CROSS_COMPLE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+
+make -C kernel KBUILD_RELSRC=kernel O=$kernel_out_dir ARCH=arm CROSS_COMPLE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= zImage-dtb
