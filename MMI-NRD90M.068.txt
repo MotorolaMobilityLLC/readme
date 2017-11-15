@@ -1,0 +1,38 @@
+
+Moto C (namath) push for nougat 7.0.0
+
+Gits published with tag MMI-NRD90M.068
+=============================================================
+
+bionic
+external/compiler-rt
+external/dnsmasq
+external/e2fsprogs
+external/eigen
+external/f2fs-tools
+external/fec
+external/gptfdisk
+external/icu
+external/iproute2
+external/iptables
+external/jemalloc
+external/libcap
+external/libcxx
+external/libcxxabi
+external/libexif
+external/libnl
+external/libunwind_llvm
+external/selinux
+external/tinycompress
+kernel-3.18
+system/core
+prebuilts/gcc/linux-x86/arm/cit-arm-eabi-4.8
+
+
+Building kernel and kernel modules:
+=============================================================
+
+cd kernel-mtk
+mkdir output
+make  O=output ARCH=arm CROSS_COMPILE="/$my_top_dir/prebuilts/gcc/linux-x86/arm/cit-arm-eabi-4.8/bin/arm-eabi-"    wt6737m_35_n_defconfig
+make -C  ./../kernel-mtk/  ARCH=arm CROSS_COMPILE="$my_top_dir/prebuilts/gcc/linux-x86/arm/cit-arm-eabi-4.8/bin/arm-eabi-"   O=output 
