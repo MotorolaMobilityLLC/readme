@@ -1,0 +1,27 @@
+NMB26.54-87 For Lenovo K8 Note
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64/
+
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/
+
+Rename kernel-msm folder to $my_top_dir/kernel
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+make -j8 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= manning_defconfig
+
+make -j8 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+
+make -j8 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+
+make -j8 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= Image.gz-dtb
