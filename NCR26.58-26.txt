@@ -1,0 +1,70 @@
+NCR26.58-26 For Moto E4 Plus
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $PWD/prebuilts/gcc/linux-x86/arm
+
+mv arm-eabi-4.8 $PWD/prebuilts/gcc/linux-x86/arm/.
+
+Rename kernel-msm folder to $PWD/kernel
+
+Download motorola-kernel repo.
+
+mkdir $PWD/motorola
+
+mv motorola-kernel $PWD/motorola/kernel
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cross=$PWD/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+
+( perl -le 'print \"# This file was automatically generated from:\\n#\\t\" . join(\"\\n#\\t\", @ARGV) . \"\\n\"' kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/mot8937.config kernel/arch/arm/configs/ext_config/mot8937-owens.config && cat kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/mot8937.config kernel/arch/arm/configs/ext_config/mot8937-owens.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cat kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/mot8937.config kernel/arch/arm/configs/ext_config/mot8937-owens.config > $kernel_out_dir/mapphone_defconfig
+
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross oldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= headers_install
+
+make -j12 -C kernel KBUILD_RELSRC=$PWD/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
+
+make -j12 -C kernel KBUILD_RELSRC=$PWD/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= dtbs
+
+make -j12 -C kernel KBUILD_RELSRC=$PWD/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules
+
+make -j12 -C kernel KBUILD_RELSRC=$PWD/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$kernel_out_dir INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+WLAN Driver:
+------------
+
+download wlan prima git
+
+mkdir -p $PWD/vendor/qcom/opensource/wlan 
+
+mv prima $PWD/vendor/qcom/opensource/wlan/.
+
+make -j12 -C kernel M=$PWD/vendor/qcom/opensource/wlan/prima O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross modules WLAN_ROOT=$PWD/vendor/qcom/opensource/wlan/prima MODNAME=wlan BOARD_PLATFORM=msm8937 CONFIG_PRONTO_WLAN=m
+
+dtvdriver:
+------------
+download dtvdriver git
+
+mkdir -p $PWD/vendor/fci 
+
+mv dtvdriver $PWD/vendor/fci/.
+
+make -j12 -C kernel M=$PWD/vendor/fci/dtvdriver/sdk/src O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross modules
