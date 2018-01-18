@@ -1,0 +1,48 @@
+OPW27.47 For Moto X (4)
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+Rename kernel-msm folder to $my_top_dir/kernel
+
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+( perl -le 'print \"# This file was automatically generated from:\\n#\\t\" . join(\"\\n#\\t\", @ARGV) . \"\\n\"' kernel/arch/arm64/configs/sdm660-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-sdm660.config kernel/arch/arm64/configs/ext_config/moto-sdm660-payton.config && cat kernel/arch/arm64/configs/sdm660-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-sdm660.config kernel/arch/arm64/configs/ext_config/moto-sdm660-payton.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross oldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= headers_install
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+
+WLAN Driver:
+------------
+
+cd $PWD/out/target/product/generic/obj
+
+make -j12 -C kernel M=$my_top_dir/vendor/qcom/opensource/wlan/qcacld-3.0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KCFLAGS=-mno-android modules WLAN_ROOT=$my_top_dir/vendor/qcom/opensource/wlan/qcacld-3.0 WLAN_COMMON_ROOT=../qca-wifi-host-cmn WLAN_COMMON_INC=$my_top_dir/vendor/qcom/opensource/wlan/qca-wifi-host-cmn WLAN_FW_INC=$my_top_dir/vendor/qcom/opensource/wlan/fw-api MODNAME=wlan BOARD_PLATFORM=sdm660 CONFIG_QCA_CLD_WLAN=m CONFIG_WLAN_CHANNEL_ONE_SCAN=y
