@@ -1,0 +1,26 @@
+MMI-XT1663-S356-170621 for MOTO M
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/darwin-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+Download kernel
+Rename kernel-mtk folder to $my_top_dir/kernel
+
+Download vendor-lenovo-exfat repo.
+mkdir -p $my_top_dir/vendor/lenovo/
+mv vendor-lenovo-exfat $my_top_dir/vendor/lenovo/.
+
+Check if $my_top_dir/kernel/fs/exfat points to the $my_top_dir/vendor/lenovo/exfat folder
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+#cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= kungfu_m_defconfig
+make -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST=
