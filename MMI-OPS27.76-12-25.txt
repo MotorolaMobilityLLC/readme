@@ -1,0 +1,50 @@
+MMI-OPS27.76-12-25 For Moto Z2 Play
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example: git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+mv arm-linux-androideabi-4.9 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+Rename kernel-msm folder to $my_top_dir/kernel
+
+Download motorola-kernel repo.
+
+mkdir $my_top_dir/motorola
+
+mv motorola-kernel $my_top_dir/motorola/kernel
+
+Check if $my_top_dir/kernel/fs/f2fs points to the $my_top_dir/motorola/kernel/fs/f2fs/ folder
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-
+
+( perl -le 'print \"# This file was automatically generated from:\\n#\\t\" . join(\"\\n#\\t\", @ARGV) . \"\\n\"' kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/mot8953-albus.config && cat kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/mot8953-albus.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= headers_install
+
+make -j12 -C kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross oldconfig
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
+
+make -j12 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
+
+WLAN Driver:
+------------
+
+cd $PWD/out/target/product/generic/obj
+
+make -j12 -C kernel M=/home/buildslave/jenkins/workspace/test_osrb/kernel/vendor/qcom/opensource/wlan/prima O=/home/buildslave/jenkins/workspace/test_osrb/kernel/out/target/product/generic/obj/kernel ARCH=arm CROSS_COMPILE=/home/buildslave/jenkins/workspace/test_osrb/kernel/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi- KCFLAGS=-mno-android modules WLAN_ROOT=../vendor/qcom/opensource/wlan/prima MODNAME=wlan BOARD_PLATFORM=msm8953 CONFIG_PRONTO_WLAN=m
