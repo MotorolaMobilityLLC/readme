@@ -1,0 +1,24 @@
+OMC27.70-39 For Lenovo K8 Note
+
+Kernel Modules:
+Download prebuilts-gcc-linux-x86-aarch64-aarch64-linux-gnu-6.3.1. Move it to $my_top_dir
+
+mkdir -p $my_top_dir/prebuilts/gcc/linux-x86/aarch64/
+
+mv arm-eabi-6.3.1 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/
+
+Rename kernel-mtk folder to $my_top_dir/kernel
+
+mkdir -p $PWD/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+
+cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-gnu-6.3.1/bin/aarch64-linux-gnu-
+
+make -j8 -C kernel-4.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross ROOTDIR=$my_top_dir
+
+make -j8 -C kernel-4.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross ROOTDIR=$my_top_dir marino_defconfig
+
+make -j8 -C kernel-4.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross ROOTDIR=$my_top_dir
+
+make -j8 -C kernel-4.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross ROOTDIR=$my_top_dir menuconfig
