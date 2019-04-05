@@ -1,0 +1,61 @@
+PPO29.80-27 For Motorola G7 Power
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-4.9
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-4.9
+
+across=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+bcross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+( perl -le 'print \"# This file was automatically generated from:\n#\t\" . join(\"\n#\t\", @ARGV) . \"\n\"' kernel/msm-4.9/arch/arm64/configs/msm8953-perf_defconfig kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-sdm632-ocean.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-sdm632-ocean.config && cat kernel/msm-4.9/arch/arm64/configs/msm8953-perf_defconfig kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-sdm632-ocean.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-sdm632-ocean.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config 
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across defoldconfig
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across oldconfig
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across headers_install
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android modules
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/out/target/product/generic INSTALL_MOD_STRIP=1 DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across modules_install
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross clean
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross mrproper
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross distclean
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across tags
+
+env KCONFIG_NOTIMESTAMP=true make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across menuconfig
+
+env KCONFIG_NOTIMESTAMP=true make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across savedefconfig
+
+WLAN Driver:
+------------
+ 
+cd $PWD/out/target/product/generic/obj
+
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/vendor/qcom/opensource/wlan/prima O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android modules WLAN_ROOT=$my_top_dir/vendor/qcom/opensource/wlan/prima MODNAME=wlan BOARD_PLATFORM=msm8953 CONFIG_PRONTO_WLAN=m ENABLE_DRIVER_VERBOSE=1
