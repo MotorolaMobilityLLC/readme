@@ -1,0 +1,371 @@
+PPO29.114-30 For Motorola G7 Power
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-4.9
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-4.9
+
+across=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+bcross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+( perl -le 'print \"# This file was automatically generated from:\n#\t\" . join(\"\n#\t\", @ARGV) . \"\n\"' kernel/msm-4.9/arch/arm64/configs/msm8953-perf_defconfig kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-sdm632-ocean.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-sdm632-ocean.config && cat kernel/msm-4.9/arch/arm64/configs/msm8953-perf_defconfig kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/debug-sdm632-ocean.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-sdm632-ocean.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config 
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across defoldconfig
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across oldconfig
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across headers_install
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/out/target/product/generic INSTALL_MOD_STRIP=1 DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across modules_install
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross clean
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross mrproper
+
+make -C kernel/msm-4.9 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross distclean
+
+make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across tags
+
+env KCONFIG_NOTIMESTAMP=true make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across menuconfig
+
+env KCONFIG_NOTIMESTAMP=true make -j16 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y ARCH=arm64 CROSS_COMPILE=$across savedefconfig
+
+
+WLAN Driver:
+------------
+ 
+cd $PWD/out/target/product/generic/obj
+
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/vendor/qcom/opensource/wlan/prima O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules  WLAN_PROPRIETARY=0 TARGET_SUPPORTS_WEARABLES= KERNEL_TO_BUILD_ROOT_OFFSET=$my_top_dir/ MODNAME=wlan BOARD_PLATFORM=msm8953 CONFIG_PRONTO_WLAN=m ENABLE_DRIVER_VERBOSE=1
+
+
+DTV Driver:
+-----------
+
+mkdir -p $PWD/out/target/product/ocean/obj/vendor/fci/dtvdriver/sdk/src
+cp -f $my_top_dir/vendor/fci/dtvdriver/sdk/src/Kbuild $PWD/out/target/product/ocean/obj/vendor/fci/dtvdriver/sdk/src/Kbuild
+cd $PWD/out/target/product/ocean/obj/vendor/fci/dtvdriver/sdk/src
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/vendor/fci/dtvdriver/sdk/src O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across  KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+
+
+Motorola Kernel Modules:
+------------------------
+
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/fs/exfat
+cp -f $my_top_dir/motorola/kernel/modules/fs/exfat/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/fs/exfat/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/fs/exfat
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/fs/exfat O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/tzlog_dump
+cp -f $my_top_dir/motorola/kernel/modules/drivers/tzlog_dump/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/tzlog_dump/Kbuild 
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/tzlog_dump
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/tzlog_dump O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/st21nfc
+cp -f $my_top_dir/motorola/kernel/modules/drivers/nfc/st21nfc/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/st21nfc/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/st21nfc
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/nfc/st21nfc O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/utag
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/utag/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/utag/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/utag
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/utag O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdogtest
+cp -f $my_top_dir/motorola/kernel/modules/drivers/watchdogtest/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdogtest/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdogtest
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/watchdogtest O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/mmi_sys_temp
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/mmi_sys_temp/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/mmi_sys_temp/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/mmi_sys_temp
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/mmi_sys_temp O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/sensors
+cp -f $my_top_dir/motorola/kernel/modules/drivers/sensors/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/sensors/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/sensors
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/sensors O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9325
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/sx9325/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9325/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9325
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/sx9325 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/abov/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/abov O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/sound/soc/codecs
+cp -f $my_top_dir/motorola/kernel/modules/sound/soc/codecs/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/sound/soc/codecs/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/sound/soc/codecs
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/sound/soc/codecs O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_info
+cp -f $my_top_dir/motorola/kernel/modules/drivers/mmi_info/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_info/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_info
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/mmi_info O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_annotate
+cp -f $my_top_dir/motorola/kernel/modules/drivers/mmi_annotate/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_annotate/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_annotate
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/mmi_annotate O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/ilitek_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/ilitek_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/ilitek_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/ilitek_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/ilitek_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/drv2624_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/drv2624_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/drv2624_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/drv2624_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/drv2624_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/tps61280
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/tps61280/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/tps61280/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/tps61280
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/tps61280 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_usbnet
+cp -f $my_top_dir/motorola/kernel/modules/drivers/moto_f_usbnet/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_usbnet/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_usbnet
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/moto_f_usbnet O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/gud/MobiCoreDriver
+cp -f $my_top_dir/motorola/kernel/modules/drivers/gud/MobiCoreDriver/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/gud/MobiCoreDriver/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/gud/MobiCoreDriver
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/gud/MobiCoreDriver O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdog_cpu_ctx
+cp -f $my_top_dir/motorola/kernel/modules/drivers/watchdog_cpu_ctx/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdog_cpu_ctx/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/watchdog_cpu_ctx
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/watchdog_cpu_ctx O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ets_fps_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/ets_fps_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ets_fps_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ets_fps_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/ets_fps_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/fpc_fps_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/fpc_fps_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/fpc_fps_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/fpc_fps_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/fpc_fps_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ldc2114_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/ldc2114_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ldc2114_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/ldc2114_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/ldc2114_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/qpnp_power_on_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/qpnp_power_on_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/qpnp_power_on_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/qpnp_power_on_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/qpnp_power_on_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L0
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/vl53L0/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L0/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L0
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/vl53L0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L1
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/misc/vl53L1/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L1/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/misc/vl53L1
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/vl53L1 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_8756_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_8756_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_8756_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_8756_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_8756_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/focaltech_0flash_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_v1430_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_v1430_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_v1430_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_v1430_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_gtx8_v1430_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83102
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83102/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83102/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83102
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83102 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83112
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83112/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83112/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83112
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/himax_v2_mmi/support_ic/himax_v2_mmi_hx83112 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_36525_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_36525_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_36525_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/nova_36525_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/nova_36525_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/raydium_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/raydium_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/raydium_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/raydium_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/raydium_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/sec_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/sec_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/sec_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/sec_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/sec_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/synaptics_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/synaptics_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_tcm_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/synaptics_tcm_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_tcm_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/input/touchscreen/synaptics_tcm_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/synaptics_tcm_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci
+cp -f $my_top_dir/motorola/kernel/modules/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov_a96t
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/abov_a96t/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov_a96t/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/abov_a96t
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/abov_a96t O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8624
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw8624/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8624/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8624
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw8624 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8695
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw8695/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8695/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw8695
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw8695 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw869x
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw869x/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw869x/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/awinic/aw869x
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw869x O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/cypress
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/cypress/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/cypress/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/cypress
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/cypress O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/pen
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/pen/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/pen/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/pen
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/pen O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9310
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/sx9310/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9310/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx9310
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/sx9310 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx933x
+cp -f $my_top_dir/motorola/kernel/modules/drivers/misc/sx933x/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx933x/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/misc/sx933x
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/misc/sx933x O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_muc_uart
+cp -f $my_top_dir/motorola/kernel/modules/drivers/mmi_muc_uart/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_muc_uart/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/mmi_muc_uart
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/mmi_muc_uart O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_diag
+cp -f $my_top_dir/motorola/kernel/modules/drivers/moto_f_diag/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_diag/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/moto_f_diag
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/moto_f_diag O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/mmi_nfc_clk
+cp -f $my_top_dir/motorola/kernel/modules/drivers/nfc/mmi_nfc_clk/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/mmi_nfc_clk/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/nfc/mmi_nfc_clk
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/nfc/mmi_nfc_clk O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/bq2597x_mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/power/bq2597x_mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/bq2597x_mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/bq2597x_mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/power/bq2597x_mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/max170xx
+cp -f $my_top_dir/motorola/kernel/modules/drivers/power/max170xx/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/max170xx/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/max170xx
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/power/max170xx O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/mmi_pl_chg_manager
+cp -f $my_top_dir/motorola/kernel/modules/drivers/power/mmi_pl_chg_manager/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/mmi_pl_chg_manager/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/mmi_pl_chg_manager
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/power/mmi_pl_chg_manager O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/qpnp-smbcharger-mmi
+cp -f $my_top_dir/motorola/kernel/modules/drivers/power/qpnp-smbcharger-mmi/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/qpnp-smbcharger-mmi/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/power/qpnp-smbcharger-mmi
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/power/qpnp-smbcharger-mmi O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+ 
+mkdir -p $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/regulator
+cp -f $my_top_dir/motorola/kernel/modules/drivers/regulator/Kbuild $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/regulator/Kbuild
+cd $PWD/out/target/product/ocean/obj/motorola/kernel/modules/drivers/regulator
+make -j16 -C kernel/msm-4.9 M=$my_top_dir/motorola/kernel/modules/drivers/regulator O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+
