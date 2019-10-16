@@ -1,0 +1,29 @@
+MMI-PTA29.401-18 & MMI-PTB29.401-18 for Moto E6 Plus
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel
+
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+( perl -le 'print \"# This file was automatically generated from:\n#\t\" . join(\"\n#\t\", @ARGV) . \"\n\"' kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/debug-msmcortex.config kernel/arch/arm/configs/ext_config/mot8937.config kernel/arch/arm/configs/ext_config/mot8937-montana.config && cat kernel/arch/arm/configs/msmcortex-perf_defconfig kernel/arch/arm/configs/ext_config/moto-msmcortex.config kernel/arch/arm/configs/ext_config/debug-msmcortex.config kernel/arch/arm/configs/ext_config/mot8937.config kernel/arch/arm/configs/ext_config/mot8937-montana.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config 
+
+make ARCH=arm CROSS_COMPILE=arm-linux-androideabi- O=o p161m_defconfig
+
+make ARCH=arm CROSS_COMPILE=arm-linux-androideabi- O=o KCFLAGS=-mno-android headers_install
+
+TARGET_PRODUCT=p161m make ARCH=arm CROSS_COMPILE=arm-linux-androideabi- O=o KCFLAGS=-mno-android -j8
