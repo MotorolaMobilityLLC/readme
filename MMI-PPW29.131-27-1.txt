@@ -1,0 +1,66 @@
+PPW29.131-27-1 For Moto Z3 Play
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+mv aarch64-linux-android-4.9 $my_top_dir/prebuilts/gcc/linux-x86/aarch64/.
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel
+
+across=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+bcross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+( perl -le 'print \"# This file was automatically generated from:\n#\t\" . join(\"\n#\t\", @ARGV) . \"\n\"' kernel/arch/arm64/configs/sdm660-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-sdm660.config kernel/arch/arm64/configs/ext_config/moto-sdm660-beckham.config kernel/arch/arm64/configs/ext_config/debug-sdm660.config kernel/arch/arm64/configs/ext_config/debug-sdm660-beckham.config && cat kernel/arch/arm64/configs/sdm660-perf_defconfig kernel/arch/arm64/configs/ext_config/moto-sdm660.config kernel/arch/arm64/configs/ext_config/moto-sdm660-beckham.config kernel/arch/arm64/configs/ext_config/debug-sdm660.config kernel/arch/arm64/configs/ext_config/debug-sdm660-beckham.config ) > $kernel_out_dir/mapphone_defconfig || ( rm -f $kernel_out_dir/mapphone_defconfig && false )
+
+cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config 
+
+make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= headers_install
+
+make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= defoldconfig
+
+make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across oldconfig
+
+make -j48 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
+
+make -j48 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
+
+make -j48 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
+
+make -j48 -C kernel KBUILD_RELSRC=$my_top_dir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross clean
+
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross mrproper
+
+make -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$bcross distclean
+
+make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= tags
+
+env KCONFIG_NOTIMESTAMP=true make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= menuconfig
+
+env KCONFIG_NOTIMESTAMP=true make -j48 -C kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KBUILD_BUILD_USER= KBUILD_BUILD_HOST= savedefconfig
+
+WLAN Driver:
+------------
+ 
+cd $PWD/out/target/product/generic/obj
+make -j48 -C kernel M=$my_top_dir/vendor/qcom/opensource/wlan/qcacld-3.0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$across KCFLAGS=-mno-android modules WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0 WLAN_COMMON_ROOT=../qca-wifi-host-cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qca-wifi-host-cmn WLAN_FW_INC=vendor/qcom/opensource/wlan/fw-api MODNAME=wlan BOARD_PLATFORM=sdm660 CONFIG_QCA_CLD_WLAN=m
+
+
