@@ -9,13 +9,13 @@ mkdir -vp  $my_top_dir/prebuilts/clang/host
 
 cd $my_top_dir/prebuilts/clang/host
 
-git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b pie-release --depth=1
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android10-release --depth=1
 
 mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
 
 cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
 
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b pie-release --depth=1
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android10-release --depth=1
 
 Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel 
 
@@ -27,13 +27,13 @@ kernel_obj_out_path=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ
 
 kernel_out_path_generic=$my_top_dir/out/target/product/generic
 
-clang=$my_top_dir/prebuilts/clang/host/linux-x86/clang-4691093/bin/clang
+clang=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r353983c/bin/clang
 
-llvm_ar=$my_top_dir/prebuilts/clang/host/linux-x86/clang-4691093/bin/llvm-ar
+llvm_ar=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r353983c/bin/llvm-ar
 
-llvm_dis=$my_top_dir/prebuilts/clang/host/linux-x86/clang-4691093/bin/llvm-dis
+llvm_dis=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r353983c/bin/llvm-dis
 
-lto_llvm=$my_top_dir/prebuilts/clang/host/linux-x86/clang-4691093/lib64/
+lto_llvm=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r353983c/lib64/
 
 cross=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android- 
 
