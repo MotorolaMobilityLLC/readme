@@ -1,0 +1,67 @@
+MMI-QPN30.33-40 For Moto G 5G Plus
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/host
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel 
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-4.19 
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-4.19 
+
+kernel_obj_out_dir=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ 
+
+aarch64_linux_android_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+arm_eabi_=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+aarch64_linux_androidkernel_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
+
+x86_64_linux_gcc=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-gcc
+
+x86_64_linux_ar=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ar
+
+x86_64_linux_ld=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld
+
+cat kernel/msm-4.19/arch/arm64/configs/vendor/lito-perf_defconfig kernel/msm-4.19/arch/arm64/configs/vendor/ext_config/moto-lito.config kernel/msm-4.19/arch/arm64/configs/vendor/ext_config/moto-lito-nairo.config >> $kernel_out_dir/.config 
+
+$make -j48 -C kernel/msm-4.19 O=$kernel_out_dir  ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- defoldconfig
+
+make -j48 -C kernel/msm-4.19 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- defoldconfig
+
+make -j48 -C kernel/msm-4.19 'HOSTCFLAGS=-I$my_top_dir/kernel/msm-4.19/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu' 'HOSTLDFLAGS=-L/usr/lib -L/usr/lib/x86_64-linux-gnu' ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ O=$kernel_out_dir REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld headers_install
+
+make -j48 -C kernel/msm-4.19 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ 'HOSTCFLAGS=-I$my_top_dir/kernel/msm-4.19/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu' 'HOSTLDFLAGS=-L/usr/lib -L/usr/lib/x86_64-linux-gnu' O=$kernel_out_dir REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld 
+
+make -j48 -C kernel/msm-4.19 O=$kernel_out_dir INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$kernel_out_dir/staging REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld modules_install
+
+make -C kernel/msm-4.19 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ clean
+
+make -C kernel/msm-4.19 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ mrproper
+
+make -C kernel/msm-4.19 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ distclean
+
+WLAN Driver:
+------------
+make -j48 -C kernel/msm-4.19 M=../../vendor/qcom/opensource/wlan/qcacld-3.0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_EGISTEC_FPS_NAVI=y CONFIG_INPUT_EGISTEC_FPS_NAVI_HORIZON=y CONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL=y CONFIG_NAV_DOUBLE_TAP=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8756 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8756 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_HIMAX_0FLASH_MMI_0FLASH=y CONFIG_INPUT_HIMAX_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_0FLASH_MMI_ENABLE_MULTI_BIN=y CONFIG_INPUT_HIMAX_0FLASH_MMI_IC_NAME=hx83112f CONFIG_INPUT_HIMAX_PANEL_NOTIFICATIONS=y CONFIG_INPUT_HIMAX_0FLASH_MMI_IC_NAME=hx83112f CONFIG_INPUT_TOUCHSCREEN_HIMAX_V2_MMI_0FLASH=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_MULTI_BIN=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_TOUCHSCREEN_HIMAX_V2_MMI_0FLASH=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_MULTI_BIN=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_PANEL_NOTIFICATIONS=y modules WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0 WLAN_COMMON_ROOT=../qca-wifi-host-cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qca-wifi-host-cmn MODNAME=wlan BOARD_PLATFORM=lito CONFIG_QCA_CLD_WLAN=m ANDROID_BUILD_TOP=$PWD
