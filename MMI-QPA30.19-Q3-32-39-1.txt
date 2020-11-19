@@ -1,0 +1,81 @@
+MMI-QPA30.19-Q3-32-39-1 for Moto g(9) plus
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+mkdir -vp  $my_top_dir/prebuilts
+
+cd $my_top_dir/prebuilts
+
+git clone https://android.googlesource.com/platform/prebuilts/build-tools
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/host
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel 
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-4.14 
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-4.14 
+
+kernel_obj_out_dir=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ 
+
+make=$my_top_dir/prebuilts/build-tools/linux-x86/bin/make
+
+aarch64_linux_androidkernel_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
+
+x86_64_linux_ar=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ar
+
+x86_64_linux_gcc=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-gcc
+
+x86_64_linux_ld=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld
+
+arm_eabi_=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+cat kernel/msm-4.14/arch/arm64/configs/vendor/sdmsteppe-perf_defconfig kernel/msm-4.14/arch/arm64/configs/vendor/ext_config/moto-sdmsteppe.config kernel/msm-4.14/arch/arm64/configs/vendor/ext_config/moto-sdmmagpie-odessa.config >> $kernel_out_dir/.config 
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- defoldconfig
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- headers_install
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- oldconfig
+
+env KCONFIG_NOTIMESTAMP=true $make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- savedefconfig
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_EGISTEC_FPS_NAVI=y CONFIG_INPUT_EGISTEC_FPS_NAVI_HORIZON=y CONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL=y CONFIG_NAV_DOUBLE_TAP=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8756 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_BQ2597X_DUAL=y CONFIG_SND_SOC_CS35L41_I2C=y
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_EGISTEC_FPS_NAVI=y CONFIG_INPUT_EGISTEC_FPS_NAVI_HORIZON=y CONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL=y CONFIG_NAV_DOUBLE_TAP=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8756 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_BQ2597X_DUAL=y CONFIG_SND_SOC_CS35L41_I2C=y modules
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/$kernel_out_path_generic INSTALL_MOD_STRIP=1 DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- modules_install
+
+$make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- tags
+
+env KCONFIG_NOTIMESTAMP=true $make -j48 -C kernel/msm-4.14 O=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$pwd/kernel/msm-4.14/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- menuconfig
+
+make -C kernel/msm-4.14 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ clean
+
+make -C kernel/msm-4.14 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ mrproper
+
+make -C kernel/msm-4.14 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ distclean
+
+WLAN Driver:
+------------
+$make -j48 -C kernel/msm-4.14 M=$my_top_dir/vendor/qcom/opensource/wlan/qcacld-3.0 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_EGISTEC_FPS_NAVI=y CONFIG_INPUT_EGISTEC_FPS_NAVI_HORIZON=y CONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL=y CONFIG_NAV_DOUBLE_TAP=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8756 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_BQ2597X_DUAL=y CONFIG_SND_SOC_CS35L41_I2C=y modules WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0 WLAN_COMMON_ROOT=../qca-wifi-host-cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qca-wifi-host-cmn MODNAME=wlan BOARD_PLATFORM=sm6150 CONFIG_QCA_CLD_WLAN=m ANDROID_BUILD_TOP=$PWD
