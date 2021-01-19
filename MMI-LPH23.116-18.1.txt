@@ -1,6 +1,8 @@
 MMI-LPH23.116-18.1 for Moto X (Gen3)
 
-
+# The most recent google toolchain seems to be causing trouble while booting this kernel.
+# The issue was debugged with @jhrycay at https://github.com/MotorolaMobilityLLC/kernel-msm/issues/38
+# It is better to use https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+/e1a8a48e59638c0d24d2214c2a85046068158a08 to compile the kernel
 
 Kernel Modules:
 ---------------
