@@ -8,9 +8,15 @@ For example:
 
 git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
 
+cd arm-linux-androideabi-4.9
+
+git checkout pie-release
+
+cd $my_top_dir
+
 mkdir -p  $my_top_dir/prebuilts/gcc/linux-x86/arm
 
-mv arm-eabi-4.8 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
+mv arm-linux-androideabi-4.9 $my_top_dir/prebuilts/gcc/linux-x86/arm/.
 
 mkdir -p $my_top_dir/out/target/product/generic/obj/kernel
 
