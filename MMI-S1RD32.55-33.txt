@@ -1,4 +1,4 @@
-S1RD32.51 for TBD
+S1RD32.55-33 for Motorola edge 30
 
 Kernel Modules:
 ---------------
