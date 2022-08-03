@@ -1,0 +1,85 @@
+RRF31.Q1-59-33 For motorola g(50)
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+mkdir -vp  $my_top_dir/prebuilts/clang/host
+
+cd $my_top_dir/prebuilts/clang/host
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/host
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel 
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-5.4 
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-5.4 
+
+clang=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/bin/clang
+
+clang_b=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902b/bin/clang
+
+lld=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/bin/ld.lld
+
+llvm_ar=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/bin/llvm-ar
+
+llvm_nm=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/bin/llvm-nm
+
+aarch64_linux_android_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+x86_64_linux_ar=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ar
+
+x86_64_linux_ld=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld
+
+make=$my_top_dir/prebuilts/build-tools/linux-x86/bin/make
+
+arm_eabi_=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+export TARGET_BUILD_VARIANT=user TARGET_PRODUCT=ibiza_retail
+
+cd $my_top_dir/kernel/msm-5.4
+
+source $my_top_dir/kernel/msm-5.4/scripts/gki/envsetup.sh holi
+
+cd $my_top_dir
+
+MAKE_PATH= ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm KERN_OUT=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld TARGET_BUILD_VARIANT=user kernel/msm-5.4/scripts/gki/generate_defconfig.sh vendor/holi-qgki_defconfig
+
+$make -j48 -C kernel/msm-5.4 O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang_b HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ vendor/holi-qgki_defconfig
+
+$make -j48 -C kernel/msm-5.4 HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$lld NM=$llvm_nm DTC_EXT=/home/chenyt17/Downloads/dtc DTC_OVERLAY_TEST_EXT=/home/chenyt17/Downloads/ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang_b HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld headers_install
+
+$make -j48 -C kernel/msm-5.4 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$lld NM=$llvm_nm DTC_EXT=/home/chenyt17/Downloads/dtc DTC_OVERLAY_TEST_EXT=/home/chenyt17/Downloads/ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang_b HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld
+
+$make -j48 -C kernel/msm-5.4 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ O=$kernel_out_dir INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$kernel_out_dir/staging REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$lld NM=$llvm_nm DTC_EXT=/home/chenyt17/Downloads/dtc DTC_OVERLAY_TEST_EXT=/home/chenyt17/Downloads/ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang_b HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld modules_install
+
+make -C kernel/msm-5.4 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ clean
+
+make -C kernel/msm-5.4 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ mrproper
+
+make -C kernel/msm-5.4 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ distclean
+
+WLAN Driver:
+------------
+make -j48 -C $kernel_out_dir M=../../vendor/qcom/opensource/wlan/qcacld-3.0 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$lld NM=$llvm_nm CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_MMI_RELAY=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_TS_KERNEL_USE_GKI=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_FLIP_CAL=y CONFIG_SND_SOC_CS35L41_SPI=y modules WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0/ WLAN_COMMON_ROOT=../qca-wifi-host-cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qca-wifi-host-cmn WLAN_FW_API=vendor/qcom/opensource/wlan/fw-api WLAN_PROFILE=default DYNAMIC_SINGLE_CHIP= MODNAME=wlan BOARD_PLATFORM=holi CONFIG_QCA_CLD_WLAN=m ANDROID_BUILD_TOP=$my_top_dir
