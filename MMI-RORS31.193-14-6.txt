@@ -1,0 +1,28 @@
+#!/bin/bash -ex
+
+mydir=`pwd`
+
+#rm -rf $mydir/out/
+mkdir -p $mydir/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$mydir/out/target/product/generic/obj/kernel
+
+cross=$mydir/bsp/toolchain/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+make -j8 -w -C bsp/kernel/kernel4.14  KBUILD_RELSRC=$mydir/bsp/kernel/kernel4.14 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android sprd_qogirl6_defconfig &> 1.log
+
+make -j8 -w -C bsp/kernel/kernel4.14  KBUILD_RELSRC=$mydir/bsp/kernel/kernel4.14 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android  &> 2.log
+
+make -j8 -w -C bsp/kernel/kernel4.14  KBUILD_RELSRC=$mydir/bsp/kernel/kernel4.14 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs &> 3.log
+
+make -j8 -w -C bsp/kernel/kernel4.14  KBUILD_RELSRC=$mydir/bsp/kernel/kernel4.14 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules &> 4.log
+
+make -j8 -w -C bsp/kernel/kernel4.14  KBUILD_RELSRC=$mydir/bsp/kernel/kernel4.14 O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install &> 5.log
+
+make -j8 -w -C bsp/kernel/kernel4.14 M=$mydir/bsp/modules/kernel4.14/wcn/bluetooth/driver O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules BSP_BOARD_UNISOC_WCN_SOCKET=sdio
+
+make -j8 -w -C bsp/kernel/kernel4.14 M=$mydir/bsp/modules/kernel4.14/wcn/bluetooth/driver O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+make -j8 -w -C bsp/kernel/kernel4.14 M=$mydir/bsp/modules/kernel4.14/wcn/wlan O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules BSP_BOARD_WLAN_DEVICE=sc2355
+
+make -j8 -w -C bsp/kernel/kernel4.14 M=$mydir/bsp/modules/kernel4.14/wcn/wlan O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross       KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
