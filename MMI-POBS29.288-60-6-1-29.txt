@@ -1,0 +1,40 @@
+#!/bin/bash
+
+me=$(readlink -f $0)
+mydir=$(dirname $me)
+
+mkdir -p $mydir/kernel/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$mydir/kernel/out/target/product/generic/obj/kernel
+
+cross=$mydir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+make -j8 -w -C kernel-4.9 KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android fiji_64_defconfig &> 1.log
+
+make -j8 -w -C kernel-4.9 KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android V=1 &> 2.log
+
+make -j8 -w -C kernel-4.9 KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs &> 3.log
+
+make -j8 -w -C kernel-4.9 KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules &> 4.log
+
+make -j8 -w -C kernel-4.9 KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install &> 5.log
+
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/common KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android  modules   AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h
+
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/common KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android       INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" modules_install
+
+cp $mydir/vendor/mediatek/kernel_modules/connectivity/common/Module.symvers $mydir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/
+cp $mydir/vendor/mediatek/kernel_modules/connectivity/common/Module.symvers $mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor/
+
+#make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx    KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android  modules   AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h  TOP=$PWD
+      
+#make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx   KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android    INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug  --remove-section=.note.gnu.build-id"  modules_install
+
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor   KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules  MODULE_NAME=wmt_chrdev_wifi  TOP=$PWD   AUTOCONF_H=$kernel_out_dir/obj/kernel/include/generated/autoconf.h 
+      
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor   KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android       INSTALL_MOD_PATH=$mydir/out/target/product/generic  INSTALL_MOD_STRIP="--strip-debug       --remove-section=.note.gnu.build-id" modules_install
+
+cp $mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor/Module.symvers $mydir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m
+
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m   O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules CONFIG_MTK_COMBO_WIFI_HIF=axi CONFIG_MTK_COMBO=y CONFIG_MTK_COMBO_CHIP_CONSYS_6765=y CONFIG_MTK_COMBO_CHIP=6765 MTK_COMBO_CHIP=CONNAC MTK_ANDROID_WMT=y WLAN_CHIP_ID=6765 CONFIG_MTK_BTIF=y CONFIG_MTK_AEE_FEATURE=y CONFIG_MTK_GPT_SCHEME_SUPPORT=y CONFIG_MACH_MT6765=y KERNEL_OUT=$kernel_out_dir MTK_PLATFORM=mt6765 ARCH_MTK_PROJECT="fiji_64" TOP=$PWD srctree=$mydir/kernel-4.9 AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h MODULE_NAME=wlan_drv_gen4m
+make -j8 -w  -C kernel-4.9   M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m       KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android       INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug       --remove-section=.note.gnu.build-id"   modules_install 
