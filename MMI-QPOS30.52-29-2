@@ -1,0 +1,85 @@
+MMI-QPOS30.52-29-2 For Moto G7 Power
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+mkdir -vp  $my_top_dir/prebuilts
+
+cd $my_top_dir/prebuilts
+
+git clone https://android.googlesource.com/platform/prebuilts/build-tools
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/host
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel 
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-4.9 
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-4.9 
+
+kernel_obj_out_dir=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ 
+
+kernel_out_path_generic=$my_top_dir/out/target/product/generic 
+
+make=$my_top_dir/prebuilts/build-tools/linux-x86/bin/make
+
+aarch64_linux_androidkernel_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
+
+x86_64_linux_ar=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ar
+
+x86_64_linux_gcc=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-gcc
+
+x86_64_linux_ld=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld
+
+arm_eabi_=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- 
+
+cat kernel/msm-4.9/arch/arm64/configs/msm8953-perf_defconfig kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-msm8953_64.config kernel/msm-4.9/arch/arm64/configs/ext_config/moto-sdm632-ocean.config >> $kernel_out_dir/.config 
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ defoldconfig
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ headers_install
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- oldconfig
+
+env KCONFIG_NOTIMESTAMP=true $make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- savedefconfig
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 Image
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir INSTALL_MOD_PATH=$my_top_dir/$kernel_out_path_generic INSTALL_MOD_STRIP=1 DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- modules_install
+
+$make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- tags
+
+env KCONFIG_NOTIMESTAMP=true $make -j8 -C kernel/msm-4.9 O=$kernel_out_dir DTC_EXT=dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$x86_64_linux_gcc HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I/usr/include -I/usr/include/x86_64-linux-gnu -L/usr/lib -L/usr/lib/x86_64-linux-gnu" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=/home2/chenyt9/osrb/workspace/497/repo/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- menuconfig
+
+make -C kernel/msm-4.9 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ clean
+
+make -C kernel/msm-4.9 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ mrproper
+
+make -C kernel/msm-4.9 O=$kernel_obj_out_dir ARCH=arm64 CROSS_COMPILE=$arm_eabi_ distclean
+
+WLAN Driver:
+------------
+$make -j8 -C kernel/msm-4.9 M=$my_top_dir/vendor/qcom/opensource/wlan/prima O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$aarch64_linux_androidkernel_ REAL_CC=$my_top_dir/vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang CLANG_TRIPLE=aarch64-linux-gnu- CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 modules WLAN_PROPRIETARY=0 TARGET_SUPPORTS_WEARABLES= KERNEL_TO_BUILD_ROOT_OFFSET=../../ MODNAME=wlan BOARD_PLATFORM=msm8953 CONFIG_PRONTO_WLAN=m ANDROID_BUILD_TOP=$PWD
