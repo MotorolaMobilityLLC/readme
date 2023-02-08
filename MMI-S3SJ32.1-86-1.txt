@@ -1,0 +1,69 @@
+MMI-S3SJ32.1-86-1 for Motorola edge 30 fusion:
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+mkdir -vp $my_top_dir/prebuilts/clang/host
+
+cd $my_top_dir/prebuilts/clang/host
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/aarch64
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+
+mkdir -vp $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+Download kernel source code. Rename kernel-* folder to $my_top_dir/kernel
+
+my_top_dir=$PWD
+
+mkdir -p $my_top_dir/out/target/product/generic/obj/kernel/msm-5.4
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/kernel/msm-5.4
+
+clang=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902b1/bin/clang
+
+ld_lld=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902b1/bin/ld.lld
+
+llvm_ar=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902b1/bin/llvm-ar
+
+llvm_nm=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902b1/bin/llvm-nm
+
+make=$my_top_dir/prebuilts/build-tools/linux-x86/bin/make
+
+aarch64_linux_android_=$my_top_dir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+x86_64_linux_ar=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ar
+
+x86_64_linux_ld=$my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld
+
+arm_eabi_=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+
+export TARGET_BUILD_VARIANT=user TARGET_PRODUCT=tundra_g
+
+cd $my_top_dir/kernel/msm-5.4/scripts/gki
+
+source $my_top_dir/kernel/msm-5.4/scripts/gki/envsetup.sh lahaina
+
+cd $my_top_dir
+
+MAKE_PATH= ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm KERN_OUT=$kernel_out_dir DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld TARGET_BUILD_VARIANT=user kernel/msm-5.4/scripts/gki/generate_defconfig.sh vendor/lahaina-qgki_defconfig
+
+$make -j48 -C kernel/msm-5.4 O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ vendor/lahaina-qgki_defconfig
+
+$make -j48 -C kernel/msm-5.4 HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld headers_install
+
+$make -j48 -C kernel/msm-5.4 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld
+
+$make -j48 -C kernel/msm-5.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$kernel_out_dir/staging REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld modules_install
