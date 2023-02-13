@@ -67,3 +67,19 @@ $make -j48 -C kernel/msm-5.4 HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/ua
 $make -j48 -C kernel/msm-5.4 ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" O=$kernel_out_dir REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld
 
 $make -j48 -C kernel/msm-5.4 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ HOSTCFLAGS="-I$my_top_dir/kernel/msm-5.4/include/uapi -I/usr/include -I/usr/include/x86_64-linux-gnu -I$my_top_dir/kernel/msm-5.4/include -L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" HOSTLDFLAGS="-L/usr/lib -L/usr/lib/x86_64-linux-gnu -fuse-ld=lld" INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$kernel_out_dir/staging REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm DTC_EXT=dtc DTC_OVERLAY_TEST_EXT=ufdt_apply_overlay CONFIG_BUILD_ARM64_DT_OVERLAY=y HOSTCC=$clang HOSTAR=$x86_64_linux_ar HOSTLD=$x86_64_linux_ld modules_install
+
+WLAN Driver:
+------------
+WLAN_BLD_DIR=$my_top_dir/vendor/qcom/opensource/wlan
+
+WLAN_ROOT=$WLAN_BLD_DIR/qcacld-3.0
+
+target_chip=wlan
+
+mkdir -vp $WLAN_ROOT/.wlan
+
+ln -sf $WLAN_ROOT $WLAN_ROOT/.wlan
+
+ln -sf $WLAN_BLD_DIR/qca-wifi-host-cmn $WLAN_ROOT/.$chip/qca-wifi-host-cmn
+
+make -j48 -C $kernel_out_dir M=../../vendor/qcom/opensource/wlan/qcacld-3.0/.wlan ARCH=arm64 CROSS_COMPILE=$aarch64_linux_android_ REAL_CC=$clang CLANG_TRIPLE=aarch64-linux-gnu- AR=$llvm_ar LLVM_NM=$llvm_nm LD=$ld_lld NM=$llvm_nm CONFIG_MMI_RELAY=y CONFIG_MMI_RELAY=y CONFIG_ET721_FOD=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8726 CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3681 CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3518u CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_INPUT_FOCALTECH_MMI_IC_NAME=ft3519 CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_TOUCHCLASS_MMI_MULTIWAY_UPDATE_FW=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_NOTIFICATIONS=y CONFIG_TS_KERNEL_USE_GKI=y CONFIG_SEC_NFC_PRODUCT_N5=y CONFIG_SEC_NFC_PRODUCT_N5=y CONFIG_SEC_NFC_IF_I2C=y CONFIG_USE_MMI_CHARGER=y CONFIG_SGM4154X_CHARGER_NAME= CONFIG_SND_SOC_CS35L41_SPI=y modules WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0/.wlan WLAN_COMMON_ROOT=./qca-wifi-host-cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qca-wifi-host-cmn WLAN_FW_API=vendor/qcom/opensource/wlan/fw-api WLAN_PROFILE=default DYNAMIC_SINGLE_CHIP=wlan MODNAME=wlan DEVNAME=wlan BOARD_PLATFORM=lahaina CONFIG_QCA_CLD_WLAN=m "CONFIG_CNSS_QCA6490=y" ANDROID_BUILD_TOP=$PWD
