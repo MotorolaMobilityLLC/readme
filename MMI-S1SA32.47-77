@@ -48,9 +48,9 @@ mkdir -vp $kernel_out_dir/arch/arm64/boot/dts/austin_evb
 
 mkdir -vp $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2
 
-python DrvGen.py kernel-4.14/drivers/misc/mediatek/dws/mt6853/austin_evb.dws $kernel_out_dir/arch/arm64/boot/dts/austin_evb $kernel_out_dir/arch/arm64/boot/dts/austin_evb cust_dtsi
+cp kernel-4.14/dvt2_cust.dtsi $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2/cust.dtsi
 
-python DrvGen.py kernel-4.14/drivers/misc/mediatek/dws/mt6853/austin_dvt2.dws $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2 $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2 cust_dtsi
+cp kernel-4.14/evb_cust.dtsi $kernel_out_dir/arch/arm64/boot/dts/austin_evb/cust.dtsi
 
 make -j48 -C kernel-4.14 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=aarch64-linux-androidkernel- CLANG_TRIPLE=aarch64-linux-gnu- LD=ld.lld LD_LIBRARY_PATH=$lib_path:$LD_LIBRARY_PATH NM=llvm-nm OBJCOPY=llvm-objcopy CC=clang ROOTDIR=$my_top_dir PATH=$clang:$cross:/usr/bin:/bin:$PATH PROJECT_DTB_NAMES='mediatek/mt6833-austin-evb-overlay mediatek/mt6833-austin-dvt2-overlay' menuconfig 
 
