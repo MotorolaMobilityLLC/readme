@@ -1,0 +1,15 @@
+##MMI-RTAS31.68-66-2  For Moto Java
+
+#!/bin/sh
+cross_path=$PWD/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+cc_path=$PWD/prebuilts/clang/host/linux-x86/clang-r383902b/bin/clang
+ld_path=$PWD/prebuilts/clang/host/linux-x86/clang-r383902b/bin/ld.lld
+cd kernel4.14
+
+mkdir out
+export ARCH=arm64
+export SUBARCH=arm64
+export CLANG_TRIPLE=aarch64-linux-gnu-
+
+make O=out ARCH=arm64 CC=$cc_path LD=$ld_path sprd_sharkl5Pro_defconfig
+make -j1 O=out ARCH=arm64 CC=$cc_path LD=$ld_path CROSS_COMPILE=$cross_path
