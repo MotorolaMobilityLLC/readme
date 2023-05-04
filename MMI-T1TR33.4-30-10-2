@@ -50,7 +50,7 @@ export AR="llvm-ar" ARCH="arm64" CC="clang" DEPMOD="depmod" DTC="$my_top_dir/bui
 
 export KCPPFLAGS="-ffile-prefix-map=$my_top_dir/common/= -ffile-prefix-map=$my_top_dir/="
 
-PATH="$my_top_dir/build/kernel/build-tools/path/linux-x86:$my_top_dir/prebuilts/clang/host/linux-x86/clang-r450784e/bin:$my_top_dir/out/msm-kernel-kalama-gki/gki_kernel/common/host_tools:$PATH"
+PATH="$my_top_dir/build/kernel/build-tools/path/linux-x86:$my_top_dir/prebuilts/clang/host/linux-x86/clang-r450784e/bin:$PATH"
 
 mkdir -p $my_top_dir/out/msm-kernel-kalama-gki/gki_kernel/common $my_top_dir/out/msm-kernel-kalama-gki/gki_kernel/dist
 
