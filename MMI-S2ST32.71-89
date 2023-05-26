@@ -1,0 +1,147 @@
+S2ST32.71-89 For motorola edge (2022)
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+my_top_dir=$PWD
+
+mkdir -vp  $my_top_dir/prebuilts
+
+cd $my_top_dir/prebuilts
+
+git clone https://android.googlesource.com/platform/prebuilts/build-tools
+
+mkdir -vp  $my_top_dir/kernel/prebuilts/
+
+git clonehttps://android.googlesource.com/kernel/prebuilts/build-tools
+
+mkdir -vp  $my_top_dir/prebuilts/clang/host
+
+cd $my_top_dir/prebuilts/clang/host
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm/
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
+
+mkdir -vp $my_top_dir/vendor/aosp_gki/kernel/aarch64
+
+cd $my_top_dir/vendor/aosp_gki/kernel/aarch64
+
+Download the kernel gki package from
+https://ci.android.com/builds/submitted/8949903/kernel_aarch64/latest
+
+cd -
+
+my_top_dir=$PWD
+
+KERNEL_DIR=$PWD/kernel-5.10
+
+REL_KERNEL_OUT="out/target/product/generic/obj/KERNEL_OBJ"
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ/kernel-5.10
+
+MODULES_STAGING_DIR=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ/staging
+
+KERNEL_ZIMAGE_OUT="$kernel_out_dir/arch/arm64/boot/Image.gz"
+
+TARGET_KERNEL_CONFIG="$kernel_out_dir/.config"
+
+PATH=$my_top_dir/build/build-tools/path/linux-x86:$my_top_dir/kernel/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$my_top_dir/../prebuilts/perl/linux-x86/bin:$my_top_dir/kernel/prebuilts/kernel-build-tools/linux-x86/bin:$PATH
+
+export CLANG_TRIPLE= CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- CROSS_COMPILE_ARM32= ARCH=arm64 SUBARCH= MAKE_GOALS=all HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf OBJSIZE=llvm-size STRIP=llvm-strip
+
+mkdir -vp $kernel_out_dir
+
+touch $kernel_out_dir/mapphone_defconfig && cat kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510.config kernel-5.10/arch/arm64/configs/ext_config/debug-mgk_64_k510.config kernel-5.10/arch/arm64/configs/ext_config/debug-mgk_64_k510-tesla.config kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510-tesla.config kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510-df.config >> $kernel_out_dir/mapphone_defconfig
+
+cp -f $kernel_out_dir/mapphone_defconfig kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig
+
+python kernel-5.10/scripts/gen_build_config.py --kernel-defconfig mgk_64_k510_defconfig -m user -o $my_top_dir/out/target/product/generic/obj/KERNEL_OBJ/build.config
+
+cp -p kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig out/target/product/generic/obj/KERNEL_OBJ/mgk_64_k510.config
+
+cd kernel-5.10 
+
+make LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$kernel_out_dir  gki_defconfig ../../../../out/target/product/generic/obj/KERNEL_OBJ/mgk_64_k510.config
+
+make -j48 O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc all vmlinux
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+
+DLKM driver
+-------------------
+make -C ../motorola/kernel/modules/drivers/power/bq25980_mmi M=$my_top_dir/motorola/kernel/modules/drivers/power/bq25980_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -C ../vendor/mediatek/kernel_modules/connectivity/common M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/common KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -C ../vendor/mediatek/kernel_modules/connectivity/conninfra M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/conninfra KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -C ../vendor/mediatek/kernel_modules/connectivity/connfem M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/connfem KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -C ../vendor/mediatek/kernel_modules/gpu M=$my_top_dir/vendor/mediatek/kernel_modules/gpu KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -C ../vendor/mediatek/kernel_modules/connectivity/fmradio M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/fmradio KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/moto_f_usbnet AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/moto_f_usbnet
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/leds/leds-gpio AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/leds/leds-gpio
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_scp AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_scp
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/power/qpnp_adaptive_charge AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/motorola/kernel/modules/drivers/power/qpnp_adaptive_charge CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/power/qpnp_adaptive_charge
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/sensors AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/sensors
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/mmi_relay AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/mmi_relay
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/input/misc/ets_fod_mmi AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/input/misc/ets_fod_mmi
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/misc/utag AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/misc/utag
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/moto_f_mass_storage AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/moto_f_mass_storage
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/mmi_info AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/mmi_info
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/connfem AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/connfem
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/sound/soc/codecs/aw882xx_dlkm AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/sound/soc/codecs/aw882xx_dlkm
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw86715 AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/misc/awinic/aw86715
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/power/cps4035 AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/power/cps4035
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/nfc/pn557 AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/nfc/pn557
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/conninfra AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/conninfra
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/common AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h MTK_CONSYS_ADIE= MTK_PLATFORM_WMT= TARGET_BOARD_PLATFORM_WMT=common src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/common
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/touchscreen_mmi AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h 'KBUILD_EXTRA_SYMBOLS=/Module.symvers src=$my_top_dir/Module.symvers' CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/touchscreen_mmi
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/misc/sx937x AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=/Module.symvers CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y HIMAX_CONFIG_KALLSYMS_ALL=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/misc/sx937x
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers CONNAC_VER=2_0 MODULE_NAME=wmt_chrdev_wifi_connac2 src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/btif AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers BT_PLATFORM=6879 'LOG_TAG=[BT_Drv][btif]' src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/btif
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_stp AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/gps_stp
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers GPS_PLATFORM=v010 src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers GPS_PLATFORM=v050 src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers GPS_PLATFORM=v030 src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/gps/data_link
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_mmi AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=/Module.symvers CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft8719 CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3519 CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft8006s CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_FOD=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y ANDROID_BUILD_TOP=$my_top_dir TOP=$my_top_dir KERNEL_DIR_PATH=kernel-5.10 src=$my_top_dir/motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_mmi
+
+make -j48 -C $kernel_out_dir O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h 'KBUILD_EXTRA_SYMBOLS=$my_top_dir/out/target/product/generic/obj/ETC/wmt_chrdev_wifi_connac2.ko_intermediates/LINKED/Module.symvers $my_top_dir/out/target/product/generic/obj/ETC/conninfra.ko_intermediates/LINKED/Module.symvers $my_top_dir/out/target/product/generic/obj/ETC/connfem.ko_intermediates/LINKED/Module.symvers'  CONFIG_MTK_COMBO_WIFI_HIF=axi MODULE_NAME=wlan_drv_gen4m_6879 MTK_COMBO_CHIP=CONNAC2X2_SOC7_0 WLAN_CHIP_ID=6879 MTK_ANDROID_WMT=y WIFI_ENABLE_GCOV= WIFI_IP_SET=1 MTK_ANDROID_EMI=y MTK_WLAN_SERVICE=yes src=$my_top_dir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m
