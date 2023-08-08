@@ -1,0 +1,28 @@
+#!/bin/bash
+
+me=$(readlink -f $0)
+mydir=$(dirname $me)
+
+mkdir -p $mydir/kernel/out/target/product/generic/obj/kernel
+
+kernel_out_dir=$mydir/kernel/out/target/product/generic/obj/kernel
+
+cross=$mydir/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android sprd_qogirl6_defconfig
+
+make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
+
+make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
+
+make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
+
+make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+make -j8 -w -C kernel M=$mydir/wcn/bluetooth/driver O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules BSP_BOARD_UNISOC_WCN_SOCKET=sdio
+
+make -j8 -w -C kernel M=$mydir/wcn/bluetooth/driver O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+
+make -j8 -w -C kernel M=$mydir/wcn/wlan O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules BSP_BOARD_WLAN_DEVICE=sc2355 WLAN_DEVICE=sc2355
+
+make -j8 -w -C kernel M=$mydir/wcn/wlan O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm64 CROSS_COMPILE=$cross       KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
