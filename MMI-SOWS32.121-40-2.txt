@@ -1,0 +1,35 @@
+#!/bin/bash
+
+me=$(readlink -f $0)
+mydir=$(dirname $me)
+kernel_out_dir=$mydir/kernel/out/target/product/generic/obj/kernel
+
+
+mkdir -p $kernel_out_dir
+
+args="KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang LLVM_IAS=1 HOSTCC=clang LD=ld.lld HOSTLD=ld.lld HOSTLDFLAGS=-fuse-ld=lld LD_LIBRARY_PATH=$mydir/prebuilts/clang/host/linux-x86/clang-r383902/lib64:$LD_LIBRARY_PATH ROOTDIR=$mydir PATH=$mydir/prebuilts/clang/host/linux-x86/clang-r383902/bin:$mydir:$PATH KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS="
+
+make -j8 -w -C kernel $args borag_defconfig 
+
+make -j8 -w -C kernel $args 
+
+make -j8 -w -C kernel $args dtbs 
+make -j8 -w -C kernel $args modules 
+
+make -j8 -w -C kernel $args INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" modules_install 
+
+make -C kernel   M=$mydir/vendor/mediatek/kernel_modules/connectivity/common $args  modules 
+
+make -C kernel   M=$mydir/vendor/mediatek/kernel_modules/connectivity/common $args       INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" modules_install
+
+make -C kernel   M=$mydir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/wmt    $args  modules BT_PLATFORM=connac1x
+      
+make -C kernel   M=$mydir/vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/wmt   $args    INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug  --remove-section=.note.gnu.build-id"  modules_install
+
+make -C kernel    M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor   $args modules  MODULE_NAME=wmt_chrdev_wifi 
+      
+make -C kernel   M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/adaptor   $args       INSTALL_MOD_PATH=$mydir/out/target/product/generic  INSTALL_MOD_STRIP="--strip-debug       --remove-section=.note.gnu.build-id" modules_install
+
+make -C kernel M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m       $args modules CONFIG_MTK_COMBO_WIFI_HIF=axi MTK_WLAN_SERVICE=yes  MTK_ANDROID_WMT=y MTK_ANDROID_EMI=y MODULE_NAME=wlan_drv_gen4m
+       
+make -C kernel M=$mydir/vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m       $args       INSTALL_MOD_PATH=$mydir/out/target/product/generic       INSTALL_MOD_STRIP="--strip-debug       --remove-section=.note.gnu.build-id"   modules_install 
