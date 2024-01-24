@@ -1,0 +1,150 @@
+T1TOS33.33-45-23-1 For moto g power 5G
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+my_top_dir=$PWD
+
+mkdir -vp $my_top_dir/kernel
+
+cd $my_top_dir/kernel
+
+git clone https://android.googlesource.com/kernel/build
+
+mkdir -vp  $my_top_dir/kernel/prebuilts-master/clang/host
+
+cd $my_top_dir/kernel/prebuilts-master/clang/host
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp  $my_top_dir/kernel/prebuilts/
+
+cd $my_top_dir/kernel/prebuilts/
+
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
+
+mkdir -vp $my_top_dir/vendor/aosp_gki/kernel/aarch64
+ 
+Download gki from:
+
+https://source.android.com/docs/core/architecture/kernel/gki-android13-5_10-release-builds
+
+cd -
+
+my_top_dir=$PWD
+
+KERNEL_DIR=$PWD/kernel-5.10
+
+REL_KERNEL_OUT="out/target/product/generic/obj/KERNEL_OBJ"
+
+kernel_out_dir=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ/kernel-5.10
+
+MODULES_STAGING_DIR=$my_top_dir/out/target/product/generic/obj/KERNEL_OBJ/staging
+
+KERNEL_ZIMAGE_OUT="$kernel_out_dir/arch/arm64/boot/Image.gz"
+
+TARGET_KERNEL_CONFIG="$kernel_out_dir/.config"
+
+PATH=$my_top_dir/kernel/prebuilts/build-tools/path/linux-x86:$my_top_dir/kernel/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$PATH
+
+export CLANG_TRIPLE= CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- CROSS_COMPILE_ARM32= ARCH=arm64 SUBARCH= MAKE_GOALS=all HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf OBJSIZE=llvm-size STRIP=llvm-strip
+
+mkdir -vp $kernel_out_dir
+
+touch $kernel_out_dir/mapphone_defconfig && cat kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510.config kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510-devonn.config kernel-5.10/arch/arm64/configs/ext_config/moto-mgk_64_k510-df.config >> $kernel_out_dir/mapphone_defconfig
+
+cp -f $kernel_out_dir/mapphone_defconfig kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig
+
+python kernel-5.10/scripts/gen_build_config.py --kernel-defconfig mgk_64_k510_defconfig --kernel-defconfig-overlays "entry_level.config" --kernel-build-config-overlays "" -m user -o $my_top_dir/out/target/product/devonf/obj/KERNEL_OBJ/build.config 
+
+cp -p kernel-5.10/arch/arm64/configs/mgk_64_k510_defconfig out/target/product/generic/obj/KERNEL_OBJ/mgk_64_k510.config
+
+cd kernel-5.10 
+
+make LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$kernel_out_dir gki_defconfig ../../../../kernel/../out/target/product/generic/obj/KERNEL_OBJ/mgk_64_k510.config entry_level.config
+
+make -j48 O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  all vmlinux
+
+make O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
+
+DLKM driver
+-------------------
+
+make -j48 -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/met_drv_v3 M=../vendor/mediatek/kernel_modules/met_drv_v3 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/met_drv_v3 M=../vendor/mediatek/kernel_modules/met_drv_v3 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/backlight/aw99703 M=../motorola/kernel/modules/drivers/backlight/aw99703 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/backlight/aw99703 M=../motorola/kernel/modules/drivers/backlight/aw99703 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/backlight/ktd3136 M=../motorola/kernel/modules/drivers/backlight/ktd3136 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/backlight/ktd3136 M=../motorola/kernel/modules/drivers/backlight/ktd3136 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/regulator/ocp2138 M=../motorola/kernel/modules/drivers/regulator/ocp2138 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/regulator/ocp2138 M=../motorola/kernel/modules/drivers/regulator/ocp2138 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/nfg1000_fg_mmi M=../motorola/kernel/modules/drivers/power/nfg1000_fg_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/nfg1000_fg_mmi M=../motorola/kernel/modules/drivers/power/nfg1000_fg_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/sc8551_mmi M=../motorola/kernel/modules/drivers/power/sc8551_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/sc8551_mmi M=../motorola/kernel/modules/drivers/power/sc8551_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/bq25980_mmi M=../motorola/kernel/modules/drivers/power/bq25980_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../motorola/kernel/modules/drivers/power/bq25980_mmi M=../motorola/kernel/modules/drivers/power/bq25980_mmi KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/common M=../vendor/mediatek/kernel_modules/connectivity/common KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/common M=../vendor/mediatek/kernel_modules/connectivity/common KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/conninfra M=../vendor/mediatek/kernel_modules/connectivity/conninfra KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/conninfra M=../vendor/mediatek/kernel_modules/connectivity/conninfra KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/connfem M=../vendor/mediatek/kernel_modules/connectivity/connfem KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/connfem M=../vendor/mediatek/kernel_modules/connectivity/connfem KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v010 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v010 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v010 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v010 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v030 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v030 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v030 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v030 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v050 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v050 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v050 M=../vendor/mediatek/kernel_modules/connectivity/gps/data_link/plat/v050 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_scp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_scp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_scp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_scp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/gpu M=../vendor/mediatek/kernel_modules/gpu KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/gpu M=../vendor/mediatek/kernel_modules/gpu KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/fmradio M=../vendor/mediatek/kernel_modules/connectivity/fmradio KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
+
+make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/fmradio M=../vendor/mediatek/kernel_modules/connectivity/fmradio KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR_DIR  modules_install
