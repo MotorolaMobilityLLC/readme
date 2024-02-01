@@ -38,6 +38,10 @@ export ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- LLVM=1 CC=clang HOSTCC=clang LD
 
 cat kernel-4.19/arch/arm/configs/k65v1_32_bsp_defconfig kernel-4.19/arch/arm/configs/ext_config/moto-k65v1_32_bsp.config kernel-4.19/arch/arm/configs/ext_config/moto-k65v1_32_bsp-maui.config kernel-4.19/arch/arm/configs/ext_config/moto-mt6765.config >> $kernel_out_dir/.config
 
+get https://github.com/MotorolaMobilityLLC/kernel-mtk/blob/MMI-S3SG32.39-191R2/cust.dtsi
+
+mv cust_dtsi $kernel_out_dir/arch/arm/boot/dts/maui_evb/.
+
 python vendor/mediatek/proprietary/tools/dct/python/DrvGen.py kernel-4.19/drivers/misc/mediatek/dws/mt6765/maui_evb.dws $kernel_out_dir/arch/arm/boot/dts/maui_evb $kernel_out_dir/arch/arm/boot/dts/maui_evb cust_dtsi
 
 $make -j48 -C kernel-4.19 O=$kernel_out_dir ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- LLVM=1 CC=clang HOSTCC=clang LD=ld.lld HOSTLD=ld.lld HOSTLDFLAGS="-fuse-ld=lld" ROOTDIR=$my_top_dir PROJECT_DTB_NAMES='mt6765-maui-evb-overlay' defoldconfig 
