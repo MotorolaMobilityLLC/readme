@@ -140,14 +140,6 @@ make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../ven
 
 make -j48 -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
 
-make -j48 -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
-
-make -j48 -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
-
 make -j48 -C ../vendor/mediatek/kernel_modules/gpu M=../vendor/mediatek/kernel_modules/gpu KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
 
 make -j48 -C ../vendor/mediatek/kernel_modules/gpu M=../vendor/mediatek/kernel_modules/gpu KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
-
-make -j48 -C ../vendor/mediatek/kernel_modules/met_drv_v3 M=../vendor/mediatek/kernel_modules/met_drv_v3 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc 
-
-make -j48 -C ../vendor/mediatek/kernel_modules/met_drv_v3 M=../vendor/mediatek/kernel_modules/met_drv_v3 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
