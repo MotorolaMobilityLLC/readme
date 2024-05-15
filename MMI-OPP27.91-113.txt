@@ -1,4 +1,4 @@
-MMI-OPP27.91-113 For Moto E6 Plus
+MMI-OPP27.91-113 For Moto E5 Plus
 
 Kernel Modules:
 ---------------
