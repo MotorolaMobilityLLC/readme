@@ -33,7 +33,8 @@ Sample Usage:
 
 my_top_dir=$PWD
 mkdir -p $PWD/out/target/product/generic/obj/kernel
-cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
+cross=$my_top_dir/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
+kernel_out_dir=$PWD/out/target/product/generic/obj/kernel
 cat kernel/arch/arm/configs/msm8610_defconfig kernel/arch/arm/configs/ext_config/debug-msm8610.config > $kernel_out_dir/mapphone_defconfig
 cp $kernel_out_dir/mapphone_defconfig $kernel_out_dir/.config
 make -j32 -C kernel ARCH=arm CROSS_COMPILE=$cross O=$kernel_out_dir defoldconfig
