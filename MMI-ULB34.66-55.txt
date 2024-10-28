@@ -1,0 +1,111 @@
+MMI-ULB34.66-55 For Motorola lionl 4G
+
+Kernel Modules:
+---------------
+ROOT_DIR=$PWD
+
+mkdir -vp $ROOT_DIR/kernel5.15/prebuilts/
+
+cd $ROOT_DIR/kernel5.15/prebuilts/
+
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
+
+mkdir -vp $ROOT_DIR/prebuilts/clang/host/
+
+cd $ROOT_DIR/prebuilts/clang/host/
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp $ROOT_DIR/prebuilts/gcc/linux-x86/host
+
+cd $ROOT_DIR/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+cd $ROOT_DIR/prebuilts/
+
+git clone https://android.googlesource.com/platform/prebuilts/clang-tools
+
+cd $ROOT_DIR/prebuilts/
+
+git clone -b android-u-beta-5.3_r0.5 --single-branch https://android.googlesource.com/kernel/prebuilts/build-tools kernel-build-tools
+
+cd $ROOT_DIR/prebuilts/
+
+git clone -b ndk-r23 --single-branch https://android.googlesource.com/platform/ndk ndk-r23
+
+mkdir -vp $ROOT_DIR/kernel5.15/
+
+cd $ROOT_DIR/kernel5.15
+
+mkdir -vp $ROOT_DIR/kernel5.15/tools
+
+Download kernel source code. Rename kernel5.15 folder to $ROOT_DIR/kernel5.15/kernel5.15
+
+export BSP_MODULES_OUT=$ROOT_DIR/kernel5.15/out_abi/android13-5.15/dist
+export BSP_BOARD_NAME=lionl MALI_PLATFORM_NAME=qogirl6 BSP_KERNEL_VERSION=kernel5.15 _SETUP_ENV_SH_INCLUDED=1 TZ=UTC LC_ALL=C KBUILD_BUILD_VERSION=1 BSP_KERNEL_BUILD_CONFIG="build.config.gki.aarch64.ums9230_" KBUILD_BUILD_USER=build-user KBUILD_BUILD_HOST=build-host MODULES_ARCHIVE=modules.tar.gz KBUILD_BUILD_TIMESTAMP="$(date +%s)" UNSTRIPPED_MODULES_ARCHIVE=unstripped_modules.tar.gz HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump OBJSIZE=llvm-size READELF=llvm-readelf STRIP=llvm-strip DECOMPRESS_GZIP="gzip -c -d" RAMDISK_EXT=gz RAMDISK_DECOMPRESS="gzip -c -d" RAMDISK_COMPRESS="gzip -c -f" DECOMPRESS_LZ4="lz4 -c -d -l" KLEAF_SUPPRESS_BUILD_SH_DEPRECATION_WARNING=1 MODULE_STRIP_FLAG="INSTALL_MOD_STRIP=1"
+export BUILD_CONFIG=kernel5.15/build.config/build.config.gki.aarch64.ums9230_user
+export KERNEL_DIR=kernel5.15/build.config
+set -a
+source $ROOT_DIR/kernel5.15/build.config/build.config.gki.aarch64.ums9230_user
+set +a
+export KERNEL_DIR=kernel5.15/build.config/..
+export BSP_KERNEL_PATH=$ROOT_DIR/kernel5.15/
+export OUT_DIR=$ROOT_DIR/out_abi/android13-5.15/kernel5.15
+export USERCFLAGS="--target=aarch64-linux-android31 --sysroot=${ROOT_DIR}/prebuilts/ndk-r23/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Wno-unused-function"
+export USERLDFLAGS="-fuse-ld=lld --rtlib=compiler-rt --target=aarch64-linux-android31 --target=aarch64-linux-android31 --sysroot=${ROOT_DIR}/prebuilts/ndk-r23/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Wno-unused-function"
+HOST_TOOLS=${OUT_DIR}/host_tools
+rm -rf ${HOST_TOOLS}
+mkdir -p ${HOST_TOOLS}
+export KCPPFLAGS="-ffile-prefix-map=${ROOT_DIR}/${KERNEL_DIR}/= -ffile-prefix-map=${ROOT_DIR}/="
+export HOSTCFLAGS="--sysroot=${ROOT_DIR}/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot  -I${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/include"
+export HOSTLDFLAGS="--sysroot=${ROOT_DIR}/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot  -Wl,-rpath,${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 -L ${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt"
+export PATH=$PATH:${ROOT_DIR}/prebuilts/clang-tools/linux-x86/bin:${ROOT_DIR}/prebuilts/build-tools/linux-x86/bin:${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/bin:${ROOT_DIR}/prebuilts/build-tools/path/linux-x86:${ROOT_DIR}/prebuilts/clang/host/linux-x86/clang-r450784e/bin:${ROOT_DIR}/out_abi/android13-5.15/kernel5.15/host_tools
+export TOOL_ARGS="LLVM=1 DEPMOD=depmod DTC=${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/bin/dtc"
+KCONFIG_CONFIG=$ROOT_DIR/kernel5.15/arch/arm64/configs/ums9230_gki_defconfig kernel5.15/scripts/kconfig/merge_config.sh -m -r $ROOT_DIR/kernel5.15/arch/arm64/configs/gki_defconfig $ROOT_DIR/kernel5.15/arch/arm64/configs/sprd_gki_sharkl6.fragment
+export MODULES_STAGING_DIR=${ROOT_DIR}/out_abi/android13-5.15/staging
+export KERNEL_UAPI_HEADERS_DIR=${ROOT_DIR}/out_abi/android13-5.15/kernel_uapi_headers
+
+mkdir -p ${OUT_DIR}
+
+cd ${KERNEL_DIR}
+
+make ${TOOL_ARGS} O=${OUT_DIR} "${MAKE_ARGS[@]}" mrproper
+
+cd ${KERNEL_DIR}
+make ${TOOL_ARGS} O=${OUT_DIR} "${MAKE_ARGS[@]}" ${DEFCONFIG}
+cd ${OUT_DIR}
+
+make O=${OUT_DIR} ${TOOL_ARGS} "${MAKE_ARGS[@]}" ${MAKE_GOALS}
+
+rm -rf ${MODULES_STAGING_DIR}
+mkdir -p ${MODULES_STAGING_DIR}
+
+cd ${OUT_DIR}
+make O=${OUT_DIR} ${TOOL_ARGS} ${MODULE_STRIP_FLAG} INSTALL_MOD_PATH=${MODULES_STAGING_DIR} "${MAKE_ARGS[@]}" modules_install
+
+External Driver:
+----------------
+
+Download extension modules source To $ROOT_DIR/kernel5.15/kernel5.15
+
+cd ${ROOT_DIR}
+
+for EXT_MOD in ${EXT_MODULES}; do
+
+EXT_MOD_REL=${ROOT_DIR}/$BSP_KERNEL_VERSION/${EXT_MOD#*/}
+
+mkdir -p ${OUT_DIR}/${EXT_MOD_REL}
+set -x
+make -C $BSP_KERNEL_VERSION/${EXT_MOD#*/} M=${EXT_MOD_REL} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} ${TOOL_ARGS} "${MAKE_ARGS[@]}"
+
+make -C $BSP_KERNEL_VERSION/${EXT_MOD#*/} M=${EXT_MOD_REL} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR}  \
+                                       O=${OUT_DIR} ${TOOL_ARGS} ${MODULE_STRIP_FLAG}         \
+                                       INSTALL_MOD_PATH=${MODULES_STAGING_DIR}                \
+                                       INSTALL_MOD_DIR="extra/$BSP_KERNEL_VERSION/${EXT_MOD#*/}" \
+                                       INSTALL_HDR_PATH="${KERNEL_UAPI_HEADERS_DIR}/usr"      \
+                                       "${MAKE_ARGS[@]}" modules_install
+set +x
+
+done
+
