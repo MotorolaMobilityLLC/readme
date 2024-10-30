@@ -1,0 +1,97 @@
+##MOTO G35 5G
+
+Kernel Modules:
+---------------
+Download prebuilts folder from Android distribution. Move it to bsp\kernel5.15
+
+For example:
+
+cd bsp\kernel5.15
+
+mkdir -vp prebuilts/clang/host
+
+cd prebuilts/clang/host
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android14-release 
+
+cd ../../..
+
+mkdir -vp prebuilts/gcc/linux-x86/host
+
+cd prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android14-release
+
+cd ../../..
+
+mkdir -vp build-tools
+
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools -b android-14.0.0_r0.131
+
+
+The build kernel commands for example:(in bsp\kernel5.15)
+
+export ARCH=arm64
+
+export ROOT_DIR=$(pwd)
+
+export OUT_DIR="$ROOT_DIR/out/android13-5.15/kernel5.15"
+
+export KERNEL_DIR="$ROOT_DIR/kernel5.15"
+
+export TOOL_ARGS="LLVM=1 DEPMOD=depmod DTC=$ROOT_DIR/prebuilts/build-tools/linux-x86/bin/dtc"
+
+export MAKE_GOALS="Image modules Image.lz4 Image.gz dtbs"
+
+export DEFCONFIG=ums9620_gki_defconfig
+
+export MODULES_STAGING_DIR="$ROOT_DIR/out/android13-5.15/staging"
+
+export MODULE_STRIP_FLAG="INSTALL_MOD_STRIP=1"
+
+export CLANG_PATH=$ROOT_DIR/prebuilts/clang/host/linux-x86/clang-r450784e/bin
+
+export PATH="${ROOT_DIR}/prebuilts/build-tools/linux-x86/bin:$CLANG_PATH:$PATH"
+
+export KCPPFLAGS="-ffile-prefix-map=${ROOT_DIR}/${KERNEL_DIR}/= -ffile-prefix-map=${ROOT_DIR}/="
+
+sysroot_flags+="--sysroot=${ROOT_DIR}/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot "
+
+LLD_COMPILER_RT="-fuse-ld=lld --rtlib=compiler-rt"
+
+cflags+="-I${ROOT_DIR}/prebuilts/build-tools/linux-x86/include "
+
+ldflags+="-Wl,-rpath,${ROOT_DIR}/prebuilts/build-tools/linux-x86/lib64 "
+
+ldflags+="-L ${ROOT_DIR}/prebuilts/build-tools/linux-x86/lib64 "
+
+ldflags+=${LLD_COMPILER_RT}
+
+export HOSTCFLAGS="$sysroot_flags $cflags"
+
+export HOSTLDFLAGS="$sysroot_flags $ldflags"
+
+rm out -rf
+
+mkdir -p "$OUT_DIR"
+
+cd $KERNEL_DIR
+
+make $TOOL_ARGS O=$OUT_DIR mrproper
+
+export KCONFIG_CONFIG=$KERNEL_DIR/arch/arm64/configs/$DEFCONFIG
+
+rm $KCONFIG_CONFIG
+
+$KERNEL_DIR/scripts/kconfig/merge_config.sh -m -r $KERNEL_DIR/arch/arm64/configs/gki_defconfig $KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro.fragment $KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro_debug.fragment
+
+unset KCONFIG_CONFIG
+make $TOOL_ARGS O=$OUT_DIR $DEFCONFIG
+
+cd $OUT_DIR
+
+make $TOOL_ARGS O=$OUT_DIR $MAKE_GOALS -j32
+
+mkdir -p "$MODULES_STAGING_DIR"
+
+make O=${OUT_DIR} ${TOOL_ARGS} ${MODULE_STRIP_FLAG}  INSTALL_MOD_PATH=${MODULES_STAGING_DIR}  modules_install -j32
