@@ -1,4 +1,4 @@
-﻿##MMI-ULA34.89-100-7 For Motorola Lion 4G
+﻿##MMI-ULA34.89-100-7 For Motorola LionPlus 4G
 
 
 Kernel Modules:
