@@ -17,7 +17,16 @@
 # Download gki from:
 # https://source.android.com/docs/core/architecture/kernel/gki-android13-5_10-release-builds
 # cd -
+
 my_top_dir=$PWD
+
+mkdir -vp  $my_top_dir/prebuilts/clang/host
+cd $my_top_dir/prebuilts/clang/host
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b aml_tz3_314012010
+cd $my_top_dir
+cd $my_top_dir/prebuilts
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
+cd $my_top_dir
 
 KERNEL_DIR=$my_top_dir/kernel-5.10
 
@@ -63,12 +72,6 @@ make -j16 O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD
 #############################################################
 cd -
 
-#mkdir -p $REL_KERNEL_OUT/vendor/mediatek/kernel_modules/fpsgo_cus
-
-#make -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc
-
-#make -C ../vendor/mediatek/kernel_modules/fpsgo_cus M=../vendor/mediatek/kernel_modules/fpsgo_cus KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
-
 mkdir -p $REL_KERNEL_OUT/vendor/mediatek/kernel_modules/met_drv_v3
 
 make -C ../vendor/mediatek/kernel_modules/met_drv_v3 M=../vendor/mediatek/kernel_modules/met_drv_v3 KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc
@@ -106,8 +109,6 @@ make -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../vendor/m
 make -C ../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp M=../vendor/mediatek/kernel_modules/connectivity/gps/gps_stp KERNEL_SRC=$KERNEL_DIR O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc  INSTALL_MOD_PATH=$MODULES_STAGING_DIR  modules_install
 
 cd $kernel_out_dir
-
-#make O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=../../ETC/fpsgo.ko_intermediates/LINKED AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=../vendor/mediatek/kernel_modules/fpsgo_cus
 
 make O=$kernel_out_dir LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc M=../../ETC/udc_lib.ko_intermediates/LINKED AUTOCONF_H=$kernel_out_dir/include/generated/autoconf.h src=$my_top_dir/vendor/mediatek/kernel_modules/udc
 
