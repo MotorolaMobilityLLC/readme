@@ -1,0 +1,102 @@
+## MMI-U2UANS34.72-43-1-8 For Manaus 5G NA
+
+Kernel Modules:
+------------------------
+my_top_dir=$PWD/kernel_platform
+
+cd $my_top_dir/
+
+git clone https://git.codelinaro.org/clo/la/kernel/build.git
+
+mkdir -vp $my_top_dir/external
+
+cd $my_top_dir/external
+
+git clone https://git.codelinaro.org/clo/la/kernel_platform/external/dtc.git
+
+mkdir -vp $my_top_dir/prebuilts-master/clang/host
+
+cd $my_top_dir/prebuilts-master/clang/host
+
+git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts-master/clang/host/linux-x86.git
+
+mkdir -vp $my_top_dir/prebuilts/gcc/linux-x86/host
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8.git
+
+mkdir -vp $my_top_dir/prebuilts
+
+cd $my_top_dir/prebuilts
+
+git clone https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tool
+
+Download kernel source code. 
+
+export PATH="$my_top_dir/build/build-tools/path/linux-x86:$my_top_dir/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$my_top_dir/prebuilts/gas/linux-x86:$PATH"
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/msm-kernel
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist
+
+cd $my_top_dir/external/dtc
+
+make all install CC=clang AR=llvm-ar LDFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -Wl,-rpath,$my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -L $my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt -fuse-ld=lld --rtlib=compiler-rt" EXTRA_CFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -I$my_top_dir/prebuilts/kernel-build-tools/linux-x86/include" PKG_CONFIG=false NO_PYTHON=1 PREFIX=$my_top_dir/out/msm-waipio-parrot-gki/host
+
+export DTC=$my_top_dir/out/msm-waipio-waipio-gki/host/bin/dtc
+
+cd $my_top_dir/common
+
+export CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- CROSS_COMPILE_ARM32= ARCH=arm64 HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf OBJSIZE=llvm-size STRIP=llvm-strip HOSTAR=x86_64-linux-ar HOSTLD=x86_64-linux-ld HOSTCFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -I$my_top_dir/prebuilts/kernel-build-tools/linux-x86/include" HOSTLDFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -Wl,-rpath,$my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -L $my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt"
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common gki_defconfig
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc olddefconfig
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_MOD_PATH=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/staging modules_install
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/System.map $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/arch/arm64/boot/Image $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/arch/arm64/boot/Image.gz $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/modules.builtin $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/modules.builtin.modinfo $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/vmlinux $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/vmlinux.symvers $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cd $my_top_dir
+
+KCONFIG_CONFIG=./msm-kernel/arch/arm64/configs/vendor/parrot-gki_defconfig ./msm-kernel/scripts/kconfig/merge_config.sh -m -r -y ./msm-kernel/arch/arm64/configs/gki_defconfig ./msm-kernel/arch/arm64/configs/vendor/parrot_GKI.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot-avatrn.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot-gki.config
+
+cd $my_top_dir/msm-kernel
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist vendor/parrot-gki_defconfig
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist modules dtbs
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_MOD_PATH=$my_top_dir/out/msm-waipio-parrot-gki/staging KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist modules_install
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_HDR_PATH=$my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist headers_install
+
+WLAN Driver:
+echo '[ -z "${VARIANT}" ] && VARIANT=gki KERNEL_DIR=./msm-kernel../msm-kernel/build.config.msm.parrot' > build.config
+
+cd $my_top_dir/../vendor/qcom/opensource/wlan/qcacld-3.0
+
+ln -sf . .qca6750
+
+cd $my_top_dir
+
+make -j48 -C ..//vendor/qcom/opensource/wlan/qcacld-3.0/.qca6750 M=../../vendor/qcom/opensource/wlan/qcacld-3.0/.qca6750 KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0/.qca6750 WLAN_COMMON_ROOT=cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qcacld-3.0/cmn WLAN_FW_API=vendor/qcom/opensource/wlan/fw-api WLAN_PROFILE=qca6750 DYNAMIC_SINGLE_CHIP= MODNAME=qca6750 DEVNAME=qca6750 BOARD_PLATFORM=parrot CONFIG_QCA_CLD_WLAN=m WLAN_CTRL_NAME=wlan ANDROID_BUILD_TOP=$my_top_dir/../ KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
