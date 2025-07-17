@@ -6,31 +6,31 @@ my_top_dir=$PWD/kernel_platform
 
 cd $my_top_dir/
 
-git clone https://git.codelinaro.org/clo/la/kernel/build.git
+git clone https://git.codelinaro.org/clo/la/kernel/build.git -b ks-kernel.lnx.1.0.r1-rel
 
 mkdir -vp $my_top_dir/external
 
 cd $my_top_dir/external
 
-git clone https://git.codelinaro.org/clo/la/kernel_platform/external/dtc.git
+git clone https://git.codelinaro.org/clo/la/kernel_platform/external/dtc.git -b ks-kernel.lnx.1.0.r1-rel
 
 mkdir -vp $my_top_dir/prebuilts-master/clang/host
 
 cd $my_top_dir/prebuilts-master/clang/host
 
-git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts-master/clang/host/linux-x86.git
+git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts-master/clang/host/linux-x86.git -b ks-kernel.lnx.1.0.r1-rel
 
 mkdir -vp $my_top_dir/prebuilts/gcc/linux-x86/host
 
 cd $my_top_dir/prebuilts/gcc/linux-x86/host
 
-git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8.git
+git clone https://git.codelinaro.org/clo/la/kernelplatform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8.git -b ks-kernel.lnx.1.0.r1-rel
 
 mkdir -vp $my_top_dir/prebuilts
 
 cd $my_top_dir/prebuilts
 
-git clone https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tools
+git clone -b ks-kernel.lnx.1.0.r1-rel https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tools 
 
 Download kernel source code. 
 
