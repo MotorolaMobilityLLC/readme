@@ -46,7 +46,7 @@ cd $my_top_dir/external/dtc
 
 make all install CC=clang AR=llvm-ar LDFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -Wl,-rpath,$my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -L $my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt -fuse-ld=lld --rtlib=compiler-rt" EXTRA_CFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -I$my_top_dir/prebuilts/kernel-build-tools/linux-x86/include" PKG_CONFIG=false NO_PYTHON=1 PREFIX=$my_top_dir/out/msm-waipio-parrot-gki/host
 
-export DTC=$my_top_dir/out/msm-waipio-waipio-gki/host/bin/dtc
+export DTC=$my_top_dir/out/msm-waipio-parrot-gki/host/bin/dtc
 
 cd $my_top_dir/common
 
