@@ -6,13 +6,13 @@ my_top_dir=$PWD/kernel_platform
 
 cd $my_top_dir/
 
-git clone https://git.codelinaro.org/clo/la/kernel/build.git -b ks-kernel.lnx.1.0.r1-rel
+git clone https://git.codelinaro.org/clo/la/kernel/build.git -b kernel.lnx.5.10.r1-rel
 
 mkdir -vp $my_top_dir/external
 
 cd $my_top_dir/external
 
-git clone https://git.codelinaro.org/clo/la/kernel_platform/external/dtc.git -b ks-kernel.lnx.1.0.r1-rel
+git clone https://git.codelinaro.org/clo/la/kernel_platform/external/dtc.git -b kernel.build.lnx.1.0.c2
 
 mkdir -vp $my_top_dir/prebuilts-master/clang/host
 
