@@ -30,7 +30,7 @@ mkdir -vp $my_top_dir/prebuilts
 
 cd $my_top_dir/prebuilts
 
-git clone https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tool
+git clone https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tools
 
 Download kernel source code. 
 
