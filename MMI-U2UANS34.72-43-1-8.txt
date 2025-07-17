@@ -34,7 +34,7 @@ git clone -b ks-kernel.lnx.1.0.r1-rel https://git.codelinaro.org/clo/la/kernel/p
 
 Download kernel source code. 
 
-export PATH="$my_top_dir/build/build-tools/path/linux-x86:$my_top_dir/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$my_top_dir/prebuilts/gas/linux-x86:$PATH"
+export PATH="$my_top_dir/build/build-tools/path/linux-x86:$my_top_dir/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$PATH"
 
 mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr
 
