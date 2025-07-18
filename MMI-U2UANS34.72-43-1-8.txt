@@ -40,7 +40,7 @@ ln -fs $my_top_dir/prebuilts/kernel-build-tools/linux-x86  $my_top_dir/build/bui
 
 SOURCE_DIRS=(
     "$my_top_dir/prebuilts/build-tools/linux-x86/bin"
-    "$my_top_dir/prebuilts/build-tools/path/linux-x86/bin"
+    "$my_top_dir/prebuilts/build-tools/path/linux-x86"
 )
 
 for current_source_dir in "${SOURCE_DIRS[@]}"; do
