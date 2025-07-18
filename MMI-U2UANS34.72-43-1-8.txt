@@ -38,11 +38,19 @@ mkdir -vp $my_top_dir/build/build-tools/path
 
 ln -fs $my_top_dir/prebuilts/kernel-build-tools/linux-x86  $my_top_dir/build/build-tools/path/linux-x86
 
-SOURCE_DIR="$my_top_dir/prebuilts/build-tools"
-for file_path in "${SOURCE_DIR}"/*; do
-    if [ -f "$file_path" ]; then
-        filename=$(basename "$file_path")
-        ln -sf "../${SOURCE_DIR_1}/${filename}" "$my_top_dir/build/build-tools/path/linux-x86/${filename}"
+SOURCE_DIRS=(
+    "$my_top_dir/prebuilts/build-tools/linux-x86/bin"
+    "$my_top_dir/prebuilts/build-tools/path/linux-x86/bin"
+)
+
+for current_source_dir in "${SOURCE_DIRS[@]}"; do
+    if [ -d "${current_source_dir}" ]; then
+        for file_path in "${current_source_dir}"/*; do
+            if [ -f "$file_path" ]; then
+                filename=$(basename "$file_path")
+				ln -sf "../${current_source_dir}/${filename}" "$my_top_dir/build/build-tools/path/linux-x86/${filename}"
+		    fi
+        done
     fi
 done
 
