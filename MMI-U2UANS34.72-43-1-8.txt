@@ -30,17 +30,27 @@ mkdir -vp $my_top_dir/prebuilts
 
 cd $my_top_dir/prebuilts
 
+git clone -b ks-kernel.lnx.1.0.r1-rel https://git.codelinaro.org/clo/la/kernel_platform/prebuilts/build-tools.git
+
 git clone -b ks-kernel.lnx.1.0.r1-rel https://git.codelinaro.org/clo/la/kernel/prebuilts/build-tools.git kernel-build-tools 
 
 mkdir -vp $my_top_dir/build/build-tools/path
 
 ln -fs $my_top_dir/prebuilts/kernel-build-tools/linux-x86  $my_top_dir/build/build-tools/path/linux-x86
 
+SOURCE_DIR="$my_top_dir/prebuilts/build-tools"
+for file_path in "${SOURCE_DIR}"/*; do
+    if [ -f "$file_path" ]; then
+        filename=$(basename "$file_path")
+        ln -sf "../${SOURCE_DIR_1}/${filename}" "$my_top_dir/build/build-tools/path/linux-x86/${filename}"
+    fi
+done
+
 ln -fs $my_top_dir/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot $my_top_dir/build/build-tools/sysroot
 
 cd $my_top_dir
 
-Download kernel source code, rename kernel-msm as msm-kernel, rename kernel-common as common
+Download kernel source code, reaname kernel-msm as msm-kernel, rename kernel-common as common
 
 git clone -b MMI-U2UANS34.72-43-1-8 git@github.com:MotorolaMobilityLLC/kernel-msm.git msm-kernel
 
