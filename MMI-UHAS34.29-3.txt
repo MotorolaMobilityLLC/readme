@@ -25,7 +25,7 @@ cd $my_top_dir/prebuilts/clang/host
 git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b aml_tz3_314012010
 cd $my_top_dir
 cd $my_top_dir/prebuilts
-it clone https://android.googlesource.com/kernel/prebuilts/build-tools
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
 cd $my_top_dir
 
 KERNEL_DIR=$my_top_dir/kernel-5.10
