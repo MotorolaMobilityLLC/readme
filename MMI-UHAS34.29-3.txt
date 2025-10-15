@@ -1,32 +1,6 @@
 # MMI-UHAS34.29-3 For moto penang 4G 4G+
-# Kernel Modules:
-# ---------------
-# Download prebuilts folder from Android distribution. Move it to $my_top_dir
-# For example:
-# my_top_dir=$PWD
-# mkdir -vp $my_top_dir/kernel
-# cd $my_top_dir/kernel
-# git clone https://android.googlesource.com/kernel/build
-# mkdir -vp  $my_top_dir/kernel/prebuilts-master/clang/host
-# cd $my_top_dir/kernel/prebuilts-master/clang/host
-# git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
-# mkdir -vp  $my_top_dir/kernel/prebuilts/
-# cd $my_top_dir/kernel/prebuilts/
-# git clone https://android.googlesource.com/kernel/prebuilts/build-tools
-# mkdir -vp $my_top_dir/vendor/aosp_gki/kernel/aarch64
-# Download gki from:
-# https://source.android.com/docs/core/architecture/kernel/gki-android13-5_10-release-builds
-# cd -
 
 my_top_dir=$PWD
-
-mkdir -vp  $my_top_dir/prebuilts/clang/host
-cd $my_top_dir/prebuilts/clang/host
-git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b aml_tz3_314012010
-cd $my_top_dir
-cd $my_top_dir/prebuilts
-git clone https://android.googlesource.com/kernel/prebuilts/build-tools
-cd $my_top_dir
 
 KERNEL_DIR=$my_top_dir/kernel-5.10
 
@@ -39,6 +13,138 @@ MODULES_STAGING_DIR=$my_top_dir/out/target/product/penangf/obj/KERNEL_OBJ/stagin
 KERNEL_ZIMAGE_OUT="$kernel_out_dir/arch/arm64/boot/Image.gz"
 
 TARGET_KERNEL_CONFIG="$kernel_out_dir/.config"
+
+KERNEL_DLKM="$my_top_dir/vendor/mediatek/kernel_modules"
+
+
+#google tools
+mkdir -vp  $my_top_dir/prebuilts/clang/host
+cd $my_top_dir/prebuilts/clang/host
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b aml_tz3_314012010
+cd $my_top_dir
+cd $my_top_dir/prebuilts
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
+cd $my_top_dir
+
+#kernel code
+mkdir -vp $my_top_dir/kernel-5.10
+cd $my_top_dir/kernel-5.10
+git clone https://github.com/MotorolaMobilityLLC/kernel-mtk.git
+cd kernel-mtk
+git checkout android-14-release-uhas34.29
+cd ../
+#cp -rf kernel-mtk kernel-5.10
+mv kernel-mtk/* ./
+cd $my_top_dir
+
+#kernel/prebuilts tools
+mkdir -vp $my_top_dir/kernel/prebuilts/
+cd $my_top_dir/kernel/prebuilts/
+git clone https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools.git
+cd kernel-prebuilts-kernel-build-tools
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf kernel-prebuilts-kernel-build-tools/ kernel-build-tools/
+cd $my_top_dir
+
+#kernel_dlkm-1
+mkdir -vp $KERNEL_DLKM
+cd $KERNEL_DLKM
+
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-gpu.git
+cd vendor-mediatek-kernel_modules-gpu
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-gpu/ gpu/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-2
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-met_drv_v3.git
+cd vendor-mediatek-kernel_modules-met_drv_v3
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-met_drv_v3/ met_drv_v3/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-3
+mkdir -vp connectivity
+cd connectivity
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-gps.git
+cd vendor-mediatek-kernel_modules-connectivity-gps
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-gps/ gps/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-4
+mkdir -vp connectivity
+cd connectivity
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-common.git
+cd vendor-mediatek-kernel_modules-connectivity-common
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-common/ common/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-5
+mkdir -vp connectivity
+cd connectivity
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-fmradio.git
+cd vendor-mediatek-kernel_modules-connectivity-fmradio
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-fmradio/ fmradio/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-6
+mkdir -vp connectivity
+cd connectivity
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-connfem.git
+cd vendor-mediatek-kernel_modules-connectivity-connfem
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-connfem/ connfem/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-7
+mkdir -vp connectivity/wlan
+cd connectivity/wlan
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-wlan-adaptor.git
+cd vendor-mediatek-kernel_modules-connectivity-wlan-adaptor
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-wlan-adaptor/ adaptor/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-8
+mkdir -vp connectivity/wlan/core
+cd connectivity/wlan/core
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-wlan-core-gen4m.git
+cd vendor-mediatek-kernel_modules-connectivity-wlan-core-gen4m
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-wlan-core-gen4m/ gen4m/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-9
+mkdir -vp connectivity/bt
+cd connectivity/bt
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-bt-mt66xx.git
+cd vendor-mediatek-kernel_modules-connectivity-bt-mt66xx
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-connectivity-bt-mt66xx/ mt66xx/
+cd $KERNEL_DLKM
+
+#kernel_dlkm-10
+git clone https://github.com/MotorolaMobilityLLC/vendor-mediatek-kernel_modules-udc.git
+cd vendor-mediatek-kernel_modules-udc
+git checkout android-14-release-uhas34.29
+cd ../
+cp -rf vendor-mediatek-kernel_modules-udc/ udc/
+cd $KERNEL_DLKM
+
+cd $my_top_dir
 
 PATH=$my_top_dir/prebuilts/build-tools/path/linux-x86:$my_top_dir/prebuilts/clang/host/linux-x86/clang-r416183b/bin:$my_top_dir/kernel/prebuilts/kernel-build-tools/linux-x86/bin:$PATH
 
