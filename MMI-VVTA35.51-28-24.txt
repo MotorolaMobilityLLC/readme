@@ -97,7 +97,7 @@ git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-conn
 git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-mtkcam.git -b android-15-release-vvta35
 
 KERNEL_ROOT_DIR=$PWD
-TARGET_PRODUCT=lagos
+TARGET_PRODUCT=lamu
 KERNEL_DEFCONFIG="mgk_64_k66_defconfig"
 KERNEL_BUILD_VARIANT=user
 KERNEL_TARGET_ARCH=arm64
@@ -106,7 +106,7 @@ LINUX_KERNEL_VERSION="kernel-6.6"
 KERNEL_DEFCONFIG_OVERLAYS="mgk_64_k66_defconfig"
 KERNEL_BAZEL_BUILD_OUT=out/target/product/${TARGET_PRODUCT}/obj/KLEAF_OBJ
 KERNEL_BAZEL_DIST_OUT=out/target/product/${TARGET_PRODUCT}/obj/KLEAF_OBJ/dist
-export BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1 DEFCONFIG_OVERLAYS="mt6768_overlay.config lagos_overlay.config" KERNEL_VERSION=kernel-6.6 SOURCE_DATE_EPOCH=0 JAVA_HOME=java-11-path PATH="${KERNEL_ROOT_DIR}/prebuilts/jdk/jdk11/linux-x86/bin:${PATH}"
+export BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1 DEFCONFIG_OVERLAYS="mt6768_overlay.config lamu_overlay.config" KERNEL_VERSION=kernel-6.6 SOURCE_DATE_EPOCH=0 JAVA_HOME=java-11-path PATH="${KERNEL_ROOT_DIR}/prebuilts/jdk/jdk11/linux-x86/bin:${PATH}"
 
 PRIVATE_BAZEL_BUILD_FLAG="--//build/bazel_mgk_rules:kernel_version=${LINUX_KERNEL_VERSION#kernel-} --experimental_writable_outputs --noenable_bzlmod --config=stamp --repo_manifest=${KERNEL_ROOT_DIR}/${KERNEL_DIR}/fake_manifest.xml"
 
