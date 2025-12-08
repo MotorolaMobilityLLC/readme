@@ -95,6 +95,8 @@ git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-met_
 git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-udc.git -b android-15-release-vvta35
 git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-connectivity-bt-linux_v2.git -b android-15-release-vvta35
 git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-mtkcam.git -b android-15-release-vvta35
+git clone git@github.com:MotorolaMobilityLLC/vendor-mediatek-kernel_modules-afs_common_utils.git -b android-15-release-vvta35
+git clone git@github.com:MotorolaMobilityLLC/kernel-kernel_device_modules-6.6.git -b android-15-release-vvta35
 
 KERNEL_ROOT_DIR=$PWD
 TARGET_PRODUCT=lamu
