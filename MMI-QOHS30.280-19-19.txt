@@ -1,20 +1,11 @@
-#!/bin/bash
+download kernel source code https://github.com/MotorolaMobilityLLC/kernel-sprd/archive/refs/tags/MMI-QOHS30.280-19-19.zip
+download perbuilt tool  https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools/archive/refs/tags/MMI-QOHS30.280-19-19.zip
 
-me=$(readlink -f $0)
-mydir=$(dirname $me)
+1.Extract both files into the same directory. Rename  to kernel and  prebuilts. 
+2. Move the KERNEL_BUILD_fijisc.sh  from the kernel directory to the same level as the kernel directory
+3. execute the KERNEL_BUILD_fijisc.sh
 
-mkdir -p $mydir/kernel/out/target/product/generic/obj/kernel
-
-kernel_out_dir=$mydir/kernel/out/target/product/generic/obj/kernel
-
-cross=$mydir/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-
-
-make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android sprd_sharkl3_defconfig
-
-make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android
-
-make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android dtbs
-
-make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= KCFLAGS=-mno-android modules
-
-make -j8 -w -C kernel KBUILD_RELSRC=$mydir/kernel O=$kernel_out_dir INSTALL_MOD_PATH=$mydir/kernel/out/target/product/generic INSTALL_MOD_STRIP="--strip-debug --remove-section=.note.gnu.build-id" ARCH=arm CROSS_COMPILE=$cross KBUILD_BUILD_USER= KBUILD_BUILD_HOST= modules_install
+work_dir/
+├── kernel/
+├── prebuilts/
+├── KERNEL_BUILD_fijisc.sh
