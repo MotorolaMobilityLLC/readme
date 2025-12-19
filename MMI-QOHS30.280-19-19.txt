@@ -1,4 +1,10 @@
 use Ubuntu 18.04
+GCC version 7.5
+Binutils version 2.30
+Bison version 3.0.4
+Flex 2.6.4
+
+
 download kernel source code https://github.com/MotorolaMobilityLLC/kernel-sprd/archive/refs/tags/MMI-QOHS30.280-19-19.zip
 download perbuilt tool  https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools/archive/refs/tags/MMI-QOHS30.280-19-19.zip
 
