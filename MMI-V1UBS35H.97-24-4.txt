@@ -1,0 +1,198 @@
+## MMI-V1UBS35H.97-24-4 For Boston V
+
+Kernel Modules:
+------------------------
+
+Top_dir=$PWD
+ 
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools/  kernel_platform/prebuilts/build-tools
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 prebuilts/clang/host/linux…
+git clone https://android.googlesource.com/kernel/prebuilts/5.10/arm64  kernel_platform/kernel/prebuilts/mainline/arm64
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+git clone  https://android.googlesource.com/platform/prebuilts/gas/linux-x86/ prebuilts/gas/linux-x86
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android11-qpr2-release prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+my_top_dir=$PWD/kernel_platform
+
+export PATH="$my_top_dir/build/build-tools/path/linux-x86:$my_top_dir/prebuilts-master/clang/host/linux-x86/clang-r416183b/bin:$my_top_dir/prebuilts/gas/linux-x86:$PATH"
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/msm-kernel
+
+mkdir -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist
+
+cd $my_top_dir/external/dtc
+
+make all install CC=clang AR=llvm-ar LDFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -Wl,-rpath,$my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -L $my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt -fuse-ld=lld --rtlib=compiler-rt" EXTRA_CFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -I$my_top_dir/prebuilts/kernel-build-tools/linux-x86/include" PKG_CONFIG=false NO_PYTHON=1 PREFIX=$my_top_dir/out/msm-waipio-parrot-gki/host
+
+export DTC=$my_top_dir/out/msm-waipio-waipio-gki/host/bin/dtc
+
+cd $my_top_dir/common
+
+export CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- CROSS_COMPILE_ARM32= ARCH=arm64 HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf OBJSIZE=llvm-size STRIP=llvm-strip HOSTAR=x86_64-linux-ar HOSTLD=x86_64-linux-ld HOSTCFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -I$my_top_dir/prebuilts/kernel-build-tools/linux-x86/include" HOSTLDFLAGS="--sysroot=$my_top_dir/build/build-tools/sysroot -Wl,-rpath,$my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -L $my_top_dir/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt"
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common gki_defconfig
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc olddefconfig
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_MOD_PATH=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/staging modules_install
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/System.map $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/arch/arm64/boot/Image $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/arch/arm64/boot/Image.gz $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/modules.builtin $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/modules.builtin.modinfo $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/vmlinux $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cp -p $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/common/vmlinux.symvers $my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist/
+
+cd $my_top_dir
+
+KCONFIG_CONFIG=./msm-kernel/arch/arm64/configs/vendor/parrot-gki_defconfig     ./msm-kernel/scripts/kconfig/merge_config.sh     -m -r -y ./msm-kernel/arch/arm64/configs/gki_defconfig ./msm-kernel/arch/arm64/configs/vendor/parrot_GKI.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot-boston.config ./msm-kernel/arch/arm64/configs/vendor/ext_config/moto-parrot-gki.config
+
+cd $my_top_dir/msm-kernel
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist vendor/parrot-gki_defconfig
+
+make -j48 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist modules dtbs
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_MOD_PATH=$my_top_dir/out/msm-waipio-parrot-gki/staging KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist modules_install
+
+make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_HDR_PATH=$my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist headers_install
+
+MOTO DLMK:
+------------
+
+cd $my_top_dir
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_sched M=../../motorola/kernel/modules/drivers/moto_sched KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_MOTO_MUTEX_INHERIT=y CONFIG_MOTO_RWSEM_INHERIT=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_mmap_fault M=../../motorola/kernel/modules/drivers/moto_mmap_fault KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc KCFLAGS=-DTUNE_MMAP_READAROUND ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_mm M=../../motorola/kernel/modules/drivers/moto_mm KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/security/moto_kern_prot M=../../motorola/kernel/modules/drivers/security/moto_kern_prot KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/misc/utag M=../../motorola/kernel/modules/drivers/misc/utag KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/regulator/slg5bm43670 M=../../motorola/kernel/modules/drivers/regulator/slg5bm43670 KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/regulator/wl2864c M=../../motorola/kernel/modules/drivers/regulator/wl2864c KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/mmi_annotate M=../../motorola/kernel/modules/drivers/mmi_annotate KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/misc/mmi_sys_temp M=../../motorola/kernel/modules/drivers/misc/mmi_sys_temp KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/mmi_relay M=../../motorola/kernel/modules/drivers/mmi_relay KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/bq27426_fg_mmi M=../../motorola/kernel/modules/drivers/power/bq27426_fg_mmi KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 CONFIG_ATL_NM40_712MAH_BATTERY_PROFILE=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_con_dfpar M=../../motorola/kernel/modules/drivers/moto_con_dfpar KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/bm_adsp_ulog M=../../motorola/kernel/modules/drivers/power/bm_adsp_ulog KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/watchdogtest M=../../motorola/kernel/modules/drivers/watchdogtest KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_swap M=../../motorola/kernel/modules/drivers/moto_swap KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_HYBRIDSWAP_ZRAM=y CONFIG_HYBRIDSWAP=y CONFIG_HYBRIDSWAP_SWAPD=y CONFIG_HYBRIDSWAP_CORE=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/sensors M=../../motorola/kernel/modules/drivers/sensors KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/misc/mmi_stow M=../../motorola/kernel/modules/drivers/misc/mmi_stow KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/wlan_antenna M=../../motorola/kernel/modules/drivers/wlan_antenna KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_f_usbnet M=../../motorola/kernel/modules/drivers/moto_f_usbnet KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/moto_f_mass_storage M=../../motorola/kernel/modules/drivers/moto_f_mass_storage KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/mmi_info M=../../motorola/kernel/modules/drivers/mmi_info KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/input/misc/anc_fps_mmi M=../../motorola/kernel/modules/drivers/input/misc/anc_fps_mmi KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc TARGET_BUILD_VARIANT=user ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/misc/hall M=../../motorola/kernel/modules/drivers/misc/hall KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_GTP_LIMIT_USE_SUPPLIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 CONFIG_HALL_PASSIVE_PEN=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/input/touchscreen/touchscreen_mmi M=../../motorola/kernel/modules/drivers/input/touchscreen/touchscreen_mmi KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_GTP_LIMIT_USE_SUPPLIER=y CONFIG_GTP_LAST_TIME=y CONFIG_ENABLE_GTP_PALM_CANCEL=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_INPUT_ILITEK_MMI_PEN_NOTIFIER=y CONFIG_ILI_TOUCH_LAST_TIME=y CONFIG_GTP_DDA_STYLUS=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y MODULE_KERNEL_VERSION=5.10 CONFIG_NOVA_TOUCH_LAST_TIME=y CONFIG_INPUT_NOVA_0FLASH_MMI_PEN_NOTIFIER=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_GTP_DDA_STYLUS=y CONFIG_INPUT_TOUCHSCREEN_MMI_NVT=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_GTP_LIMIT_USE_SUPPLIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS_API=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/misc/sx937x M=../../motorola/kernel/modules/drivers/misc/sx937x KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 CONFIG_SX937X_USB_CAL=y CONFIG_SX937X_POWER_SUPPLY_ONLINE=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi M=../../motorola/kernel/modules/drivers/input/misc/goodix_fod_mmi KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/mmi_charger M=../../motorola/kernel/modules/drivers/power/mmi_charger KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/nfc/st21nfc M=../../motorola/kernel/modules/drivers/nfc/st21nfc KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_mmi M=../../motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_mmi KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_GTP_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_TOUCHSCREEN_MMI=y MODULE_KERNEL_VERSION=5.10 CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3681 CONFIG_INPUT_FOCALTECH_V3_MMI_PEN_NOTIFIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_FTS_LAST_TIME=y CONFIG_ENABLE_FTS_PALM_CANCEL=y CONFIG_INPUT_FOCAL_IC_NAME=ft3681 CONFIG_INPUT_FOCALTECH_V3_MMI_PEN_NOTIFIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_FTS_LAST_TIME=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_GTP_LIMIT_USE_SUPPLIER=y CONFIG_GTP_ENABLE_PM_QOS=y CONFIG_GTP_FOD=y CONFIG_GTP_LAST_TIME=y CONFIG_MOTO_DDA_PASSIVE_STYLUS=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_GTP_GHOST_LOG_CAPTURE=y CONFIG_ENABLE_GTP_PALM_CANCEL=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_INPUT_GTP_PASSIVE_PEN_NOTIFIER=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/qpnp_adaptive_charge M=../../motorola/kernel/modules/drivers/power/qpnp_adaptive_charge KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 MODULE_KERNEL_VERSION=5.10 CONFIG_USE_MMI_CHARGER=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/qti_glink_charger M=../../motorola/kernel/modules/drivers/power/qti_glink_charger KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CONFIG_WIRELESS_CPS4035B=y ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//motorola/kernel/modules/drivers/power/sgm4154x_charger_lite M=../../motorola/kernel/modules/drivers/power/sgm4154x_charger_lite KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODULE_KERNEL_VERSION=5.10 CONFIG_SGM4154X_CHARGER_NAME=sgm41516D ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+Qcom DLKM:
+------------
+
+make -j48 -C ../vendor/qcom/proprietary/cvp-devicetree M=../../vendor/qcom/proprietary/cvp-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/video-devicetree M=../../vendor/qcom/proprietary/video-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/camera-devicetree M=../../vendor/qcom/proprietary/camera-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/display-devicetree M=../../vendor/qcom/proprietary/display-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/audio-devicetree M=../../vendor/qcom/proprietary/audio-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/eva-devicetree M=../../vendor/qcom/proprietary/eva-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ../vendor/qcom/proprietary/mmrm-devicetree M=../../vendor/qcom/proprietary/mmrm-devicetree KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc dtbs  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/sch M=../../vendor/qcom/opensource/datarmnet-ext/sch KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/wlan M=../../vendor/qcom/opensource/datarmnet-ext/wlan KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet/core M=../../vendor/qcom/opensource/datarmnet/core KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/mmrm-driver M=../../vendor/qcom/opensource/mmrm-driver KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MMRM_ROOT=$my_top_dir/../vendor/qcom/opensource/mmrm-driver BOARD_PLATFORM=parrot ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/perf_tether M=../../vendor/qcom/opensource/datarmnet-ext/perf_tether KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc RMNET_CORE_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet/core RMNET_CORE_PATH=vendor/qcom/opensource/datarmnet/core DATARMNET_CORE_PATH=datarmnet/core ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/aps M=../../vendor/qcom/opensource/datarmnet-ext/aps KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc RMNET_CORE_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet/core RMNET_CORE_PATH=vendor/qcom/opensource/datarmnet/core DATARMNET_CORE_PATH=datarmnet/core ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/shs M=../../vendor/qcom/opensource/datarmnet-ext/shs KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc RMNET_CORE_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet/core RMNET_CORE_PATH=vendor/qcom/opensource/datarmnet/core DATARMNET_CORE_PATH=datarmnet/core ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/offload M=../../vendor/qcom/opensource/datarmnet-ext/offload KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc RMNET_CORE_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet/core RMNET_CORE_PATH=vendor/qcom/opensource/datarmnet/core DATARMNET_CORE_PATH=datarmnet/core ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/audio-kernel M=../../vendor/qcom/opensource/audio-kernel KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc AUDIO_ROOT=$my_top_dir/../vendor/qcom/opensource/audio-kernel MODNAME=audio_dlkm BOARD_PLATFORM=parrot ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/dataipa/drivers/platform/msm M=../../vendor/qcom/opensource/dataipa/drivers/platform/msm KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc MODNAME=gsim ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/datarmnet-ext/perf M=../../vendor/qcom/opensource/datarmnet-ext/perf KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc RMNET_CORE_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet/core RMNET_CORE_PATH=vendor/qcom/opensource/datarmnet/core DATARMNET_CORE_PATH=datarmnet/core RMNET_SHS_INC_DIR=$my_top_dir/../vendor/qcom/opensource/datarmnet-ext/shs RMNET_SHS_PATH=vendor/qcom/opensource/datarmnet-ext/shs DATARMNET_SHS_PATH=datarmnet-ext/shs ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/video-driver M=../../vendor/qcom/opensource/video-driver KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc VIDEO_ROOT=$my_top_dir/../vendor/qcom/opensource/video-driver MODNAME=msm_video BOARD_PLATFORM=parrot CONFIG_MSM_VIDC_V4L2=m KBUILD_EXTRA_SYMBOLS=$my_top_dir/../../vendor/out/target/product/boston/obj/DLKM/mmrm-module-symvers_intermediates/Module.symvers ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/camera-kernel M=../../vendor/qcom/opensource/camera-kernel KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc CAMERA_KERNEL_ROOT=$my_top_dir/../vendor/qcom/opensource/camera-kernel KERNEL_ROOT=/home/liuya9/workspace/osrb/874/vendor/kernel/msm-5.10/ MODNAME=camera BOARD_PLATFORM=parrot KBUILD_EXTRA_SYMBOLS=$my_top_dir/../../vendor/out/target/product/boston/obj/DLKM/mmrm-module-symvers_intermediates/Module.symvers ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+make -j48 -C ..//vendor/qcom/opensource/display-drivers/msm M=../../vendor/qcom/opensource/display-drivers/msm KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc DISPLAY_ROOT=./vendor/qcom/opensource/display-drivers MODNAME=msm_drm BOARD_PLATFORM=parrot CONFIG_DRM_MSM=m KBUILD_EXTRA_SYMBOLS=/$my_top_dir/../../vendor/out/target/product/boston/obj/DLKM/mmrm-module-symvers_intermediates/Module.symvers ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
+
+WLAN Driver:
+------------
+
+echo '[ -z "${VARIANT}" ] && VARIANT=gki KERNEL_DIR=./msm-kernel../msm-kernel/build.config.msm.parrot' > build.config
+
+cd $my_top_dir/../vendor/qcom/opensource/wlan/qcacld-3.0
+
+ln -sf . .adrastea
+
+cd $my_top_dir
+
+make -C ..//vendor/qcom/opensource/wlan/qcacld-3.0/.adrastea M=../../vendor/qcom/opensource/wlan/qcacld-3.0/.adrastea KERNEL_SRC=$my_top_dir/./msm-kernel O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc WLAN_ROOT=vendor/qcom/opensource/wlan/qcacld-3.0/.adrastea WLAN_COMMON_ROOT=cmn WLAN_COMMON_INC=vendor/qcom/opensource/wlan/qcacld-3.0/cmn WLAN_FW_API=vendor/qcom/opensource/wlan/fw-api WLAN_PROFILE=adrastea DYNAMIC_SINGLE_CHIP= MODNAME=adrastea DEVNAME=adrastea BOARD_PLATFORM=parrot CONFIG_QCA_CLD_WLAN=m WLAN_CTRL_NAME=wlan ANDROID_BUILD_TOP=$my_top_dir/../  KBUILD_MIXED_TREE=..//device/qcom/parrot-kernel
