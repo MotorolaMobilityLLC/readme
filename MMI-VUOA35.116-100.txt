@@ -3,7 +3,7 @@
 Kernel Modules:
 ---------------
 Download prebuilts folder from Android distribution. Move it to bsp\kernel5.15
-git clone https://github.com/MotorolaMobilityLLC/kernel-sprd/tree/MMI-VUOA35.82
+git clone https://github.com/MotorolaMobilityLLC/kernel-sprd/tree/MMI-VUOA35.116-100
 
 For example:
 
@@ -13,7 +13,7 @@ mkdir -vp prebuilts/clang/host
 
 cd prebuilts/clang/host
 
-git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android14-release 
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android15-release 
 
 cd ../../..
 
@@ -21,13 +21,13 @@ mkdir -vp prebuilts/gcc/linux-x86/host
 
 cd prebuilts/gcc/linux-x86/host
 
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android14-release
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android15-release
 
 cd ../../..
 
 mkdir -vp kernel-build-tools
 
-git clone https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools/tree/MMI-VUOA35.82
+git clone https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools/tree/MMI-VUOA35.116-100
 
 
 The build kernel commands for example:(in bsp\kernel5.15)
