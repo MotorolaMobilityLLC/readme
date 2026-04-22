@@ -2,18 +2,18 @@
 
 Kernel Modules:
 ---------------
-Download prebuilts folder from Android distribution. Move it to bsp\kernel5.15
+Download prebuilts folder from Android distribution. Move it to bsp/kernel5.15
 git clone https://github.com/MotorolaMobilityLLC/kernel-sprd/tree/MMI-VUOA35.116-100
 
 For example:
 
-cd bsp\kernel5.15
+cd bsp/kernel5.15
 
 mkdir -vp prebuilts/clang/host
 
 cd prebuilts/clang/host
 
-git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android15-release 
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android14-release 
 
 cd ../../..
 
@@ -21,57 +21,211 @@ mkdir -vp prebuilts/gcc/linux-x86/host
 
 cd prebuilts/gcc/linux-x86/host
 
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android15-release
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 -b android14-release
 
 cd ../../..
 
 mkdir -vp kernel-build-tools
 
-git clone https://github.com/MotorolaMobilityLLC/kernel-prebuilts-kernel-build-tools/tree/MMI-VUOA35.116-100
+download kernel-build-tools from https://android.googlesource.com/kernel/prebuilts/build-tools/+/07b44a63150de430daa6338a18067e7521a458e1
+
+chmod +x kernel5.15/arch/arm64/kernel/vdso/gen_vdso_offsets.sh
+chmod +x build_kernel.sh(The content of this compilation script is suggested at the bottom of the documentation.)
+
+cd kernel5.15/scripts
+chmod +x -R *
 
 
-The build kernel commands for example:(in bsp\kernel5.15)
-Save the following content as a separate shell script and execute itin bsp\kernel5.15 .
+Directory Structure：
+/work/bsp$ ls -l
+-rwxrwxr-x  1 XXXX XXXX 5591 4月  22 13:44 build_kernel.sh
+drwxrwxr-x 28 XXXX XXXX 4096 4月  22 14:46 kernel5.15
+drwxrwxr-x  5 XXXX XXXX 4096 4月  22 09:55 prebuilts
+
+/work/bsp/prebuilts$ ls -l 
+drwxrwxr-x 5 XXXX XXXX 4096 4月  22 09:55 ./
+drwxrwxr-x 5 XXXX XXXX 4096 4月  22 15:29 ../
+drwxrwxr-x 3 XXXX XXXX 4096 4月  21 10:29 clang/
+drwxrwxr-x 3 XXXX XXXX 4096 4月  21 22:40 gcc/
+drwxrwxr-x 4 XXXX XXXX 4096 4月  22 10:14 kernel-build-tools/
+
+
+/work/bsp/prebuilts/kernel-build-tools$ ls -l
+total 52
+drwxr-xr-x 3 XXXX XXXX  4096 4月  14 14:51 bazel
+-rw-r--r-- 1 XXXX XXXX  4714 4月  14 14:51 bazel-release.pub.gpg
+-rw-r--r-- 1 XXXX XXXX  1994 4月  14 14:51 BUILD.bazel
+-rwxr-xr-x 1 XXXX XXXX  3365 4月  14 14:52 build-prebuilts.sh
+-rw-r--r-- 1 XXXX XXXX  1823 4月  14 14:52 cc.bzl
+drwxr-xr-x 6 XXXX XXXX  4096 4月  14 14:52 linux-x86
+-rw-r--r-- 1 XXXX XXXX 10312 4月  14 14:53 manifest.xml
+-rw-r--r-- 1 XXXX XXXX    99 4月  14 14:51 OWNERS
+-rwxr-xr-x 1 XXXX XXXX  2116 4月  14 14:53 update-bazel.sh
+-rwxr-xr-x 1 XXXX XXXX  1081 4月  14 14:53 update-prebuilts.sh
+
+
+Save the following content as a separate shell script(build_kernel.sh) and execute it in bsp folder.
+-------------------------------------------------------------------
+#!/bin/bash
+
+# Check and install necessary dependencies (install only if missing).
+echo "Checking required dependencies..."
+MISSING_DEPS=""
+
+for tool in flex bison lld; do
+    if ! command -v $tool &> /dev/null; then
+        MISSING_DEPS="$MISSING_DEPS $tool"
+    fi
+done
+
+# Check development libraries.
+if ! dpkg -l | grep -q "libssl-dev" 2>/dev/null; then
+    MISSING_DEPS="$MISSING_DEPS libssl-dev"
+fi
+if ! dpkg -l | grep -q "libelf-dev" 2>/dev/null; then
+    MISSING_DEPS="$MISSING_DEPS libelf-dev"
+fi
+
+if [ -n "$MISSING_DEPS" ]; then
+    echo "Missing dependencies:$MISSING_DEPS"
+    echo "Installing missing dependencies..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update
+        sudo apt-get install -y $MISSING_DEPS bc kmod cpio device-tree-compiler build-essential
+    else
+        echo "Please install missing dependencies manually: $MISSING_DEPS"
+        exit 1
+    fi
+else
+    echo "All required dependencies are already installed."
+fi
 
 export ARCH=arm64
-Export ROOT_DIR=$(pwd)
-export OUT_DIR="$ROOT_DIR/out/android15-5.15/kernel5.15"
+export ROOT_DIR=$(pwd)
+export OUT_DIR="$ROOT_DIR/out/android13-5.15/kernel5.15"
 export KERNEL_DIR="$ROOT_DIR/kernel5.15"
 export TOOL_ARGS="LLVM=1 DEPMOD=depmod DTC=$ROOT_DIR/prebuilts/kernel-build-tools/linux-x86/bin/dtc"
 export MAKE_GOALS="Image modules Image.lz4 Image.gz dtbs"
 export DEFCONFIG=ums9620_gki_defconfig
 export MODULES_STAGING_DIR="$ROOT_DIR/out/android13-5.15/staging"
 export MODULE_STRIP_FLAG="INSTALL_MOD_STRIP=1"
-export CLANG_PATH=$ROOT_DIR/prebuilts/clang/host/linux-x86/clang-r450784e/bin
+
+# Check if the clang path exists.
+CLANG_VERSION="clang-r450784e"
+export CLANG_PATH="$ROOT_DIR/prebuilts/clang/host/linux-x86/$CLANG_VERSION/bin"
+if [ ! -d "$CLANG_PATH" ]; then
+    echo "Error: CLANG_PATH not found: $CLANG_PATH"
+    echo "Available clang versions:"
+    ls -d $ROOT_DIR/prebuilts/clang/host/linux-x86/clang-* 2>/dev/null
+    exit 1
+fi
+
 export PATH="${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/bin:$CLANG_PATH:$PATH"
 
+echo "Using clang: $(which clang)"
+clang --version
 
 export KCPPFLAGS="-ffile-prefix-map=${ROOT_DIR}/${KERNEL_DIR}/= -ffile-prefix-map=${ROOT_DIR}/="
-sysroot_flags+="--sysroot=${ROOT_DIR}/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot "
+sysroot_flags="--sysroot=${ROOT_DIR}/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot "
 LLD_COMPILER_RT="-fuse-ld=lld --rtlib=compiler-rt"
-cflags+="-I${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/include "
-ldflags+="-Wl,-rpath,${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 "
+cflags="-I${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/include "
+ldflags="-Wl,-rpath,${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 "
 ldflags+="-L ${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 "
-ldflags+=${LLD_COMPILER_RT}
+ldflags+=" ${LLD_COMPILER_RT}"
 export HOSTCFLAGS="$sysroot_flags $cflags"
 export HOSTLDFLAGS="$sysroot_flags $ldflags"
 
-rm out -rf
+# Clean up and create the output directory
+rm -rf out
 mkdir -p "$OUT_DIR"
-cd $KERNEL_DIR
+
+cd $KERNEL_DIR || exit 1
+
+# Clean up previous compilations
 make $TOOL_ARGS O=$OUT_DIR mrproper
 
+# Merge configuration
 export KCONFIG_CONFIG=$KERNEL_DIR/arch/arm64/configs/$DEFCONFIG
-rm $KCONFIG_CONFIG
+rm -f $KCONFIG_CONFIG
+
+# Check if the fragment file exists
+if [ ! -f "$KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro.fragment" ]; then
+    echo "Warning: sprd_gki_qogirn6pro.fragment not found"
+fi
+if [ ! -f "$KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro_debug.fragment" ]; then
+    echo "Warning: sprd_gki_qogirn6pro_debug.fragment not found"
+fi
 
 $KERNEL_DIR/scripts/kconfig/merge_config.sh -m -r $KERNEL_DIR/arch/arm64/configs/gki_defconfig $KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro.fragment $KERNEL_DIR/arch/arm64/configs/sprd_gki_qogirn6pro_debug.fragment
 
 unset KCONFIG_CONFIG
+
+# Generate configuration
 make $TOOL_ARGS O=$OUT_DIR $DEFCONFIG
 
+# Compile (excluding modules_install, just compile)
+echo "Building kernel and modules..."
+cd $OUT_DIR || exit 1
 
-cd $OUT_DIR
-make $TOOL_ARGS O=$OUT_DIR $MAKE_GOALS -j32
+# ============================================
+# Key modification: Add the header file path via the DTC_INCLUDE environment variable.
+# ============================================
+export DTC_INCLUDE="-I ${KERNEL_DIR}/include"
 
-mkdir -p "$MODULES_STAGING_DIR"
-make O=${OUT_DIR} ${TOOL_ARGS} ${MODULE_STRIP_FLAG}  INSTALL_MOD_PATH=${MODULES_STAGING_DIR}  modules_install -j32
+# First, compile the kernel image and dtbs (passing DTC_INCLUDE).
+make $TOOL_ARGS O=$OUT_DIR Image Image.lz4 Image.gz dtbs -j$(nproc) DTC_INCLUDE="$DTC_INCLUDE"
+
+# Compile modules separately
+echo "Building modules..."
+make $TOOL_ARGS O=$OUT_DIR modules -j$(nproc)
+
+# Check if the module compilation was successful
+if [ $? -ne 0 ]; then
+    echo "Module compilation failed!"
+    exit 1
+fi
+
+# Check if modules.order has been generated
+if [ ! -f "$OUT_DIR/modules.order" ]; then
+    echo "Error: modules.order not found. Checking module build status..."
+    echo "Looking for .ko files:"
+    find $OUT_DIR -name "*.ko" -type f 2>/dev/null | head -20
+    
+    # Check the module settings in the configuration file
+    echo "Checking kernel config for module support:"
+    grep "CONFIG_MODULES" $OUT_DIR/.config
+    
+    # Try creating modules.order manually (if the module exists but the file is missing)
+    KO_COUNT=$(find $OUT_DIR -name "*.ko" -type f 2>/dev/null | wc -l)
+    if [ $KO_COUNT -gt 0 ]; then
+        echo "Found $KO_COUNT .ko files but modules.order is missing. Creating modules.order..."
+        find $OUT_DIR -name "*.ko" -type f > $OUT_DIR/modules.order
+    else
+        echo "No modules were built. This might be expected if CONFIG_MODULES is not enabled."
+        echo "Continuing without module installation..."
+        exit 0
+    fi
+fi
+
+# Installation Module
+if [ -f "$OUT_DIR/modules.order" ]; then
+    echo "Installing modules to staging directory..."
+    mkdir -p "$MODULES_STAGING_DIR"
+    make O=${OUT_DIR} ${TOOL_ARGS} ${MODULE_STRIP_FLAG} INSTALL_MOD_PATH=${MODULES_STAGING_DIR} modules_install -j$(nproc)
+    
+    if [ $? -eq 0 ]; then
+        echo "Build completed successfully!"
+        echo "Kernel images are in: $OUT_DIR/arch/arm64/boot/"
+        echo "Modules are in: $MODULES_STAGING_DIR"
+    else
+        echo "Module installation failed."
+        exit 1
+    fi
+else
+    echo "No modules to install."
+fi
+
+echo "Build process finished!"
+
+
+
