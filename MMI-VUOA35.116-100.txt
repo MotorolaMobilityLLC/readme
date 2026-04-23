@@ -7,7 +7,7 @@ git clone https://github.com/MotorolaMobilityLLC/kernel-sprd/tree/MMI-VUOA35.116
 
 For example:
 
-cd bsp/kernel5.15
+cd bsp
 
 mkdir -vp prebuilts/clang/host
 
