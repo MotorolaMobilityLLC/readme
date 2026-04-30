@@ -70,7 +70,7 @@ make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 D
 
 make -j48 O=$my_top_dir/out/msm-waipio-parrot-gki/msm-kernel LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=dtc INSTALL_HDR_PATH=$my_top_dir/out/msm-waipio-parrot-gki/kernel_uapi_headers/usr KBUILD_MIXED_TREE=$my_top_dir/out/msm-waipio-parrot-gki/gki_kernel/dist headers_install
 
-MOTO DLMK:
+MOTO DLKM:
 ------------
 
 cd $my_top_dir
