@@ -37,6 +37,14 @@ lib_path=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/lib64
 
 clang=$my_top_dir/prebuilts/clang/host/linux-x86/clang-r383902/bin
 
+mkdir -p $kernel_out_dir/arch/arm64/boot/dts/austin_evb
+mkdir -p $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2
+
+get https://github.com/MotorolaMobilityLLC/kernel-mtk/blob/android-13-release-ttt/arch/arm64/boot/dts/austin_evb/cust.dtsi
+mv cust.dtsi $kernel_out_dir/arch/arm64/boot/dts/austin_evb/.
+get https://github.com/MotorolaMobilityLLC/kernel-mtk/blob/android-13-release-ttt/arch/arm64/boot/dts/austin_dvt2/cust.dtsi
+mv cust.dtsi $kernel_out_dir/arch/arm64/boot/dts/austin_dvt2/.
+
 cat kernel-4.19/arch/arm64/configs/k6833v1_64_k419_defconfig kernel-4.19/arch/arm64/configs/ext_config/moto-k6833v1_64_k419.config kernel-4.19/arch/arm64/configs/ext_config/moto-k6833v1_64-austin.config >> $kernel_out_dir/.config
 
 $make -j48 -C kernel-4.19 O=$kernel_out_dir ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang LLVM_IAS=1 HOSTCC=clang LD=ld.lld HOSTLD=ld.lld HOSTLDFLAGS=-fuse-ld=lld LD_LIBRARY_PATH=$lib_path:$LD_LIBRARY_PATH ROOTDIR=$my_top_dir/vendor PATH=$clang:$my_top_dir:/usr/bin:/bin:$PATH PROJECT_DTB_NAMES='mediatek/mt6833-austin-evb-overlay mediatek/mt6833-austin-dvt2-overlay' menuconfig
