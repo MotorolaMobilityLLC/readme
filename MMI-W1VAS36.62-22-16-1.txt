@@ -1,0 +1,240 @@
+W1VAS36.62-22-16-1 for moto g stylus - 2025 (mona)
+
+
+Kernel Modules:
+---------------
+
+top_dir=$PWD
+
+mkdir -vp $top_dir/kernel_platform/build
+
+cd $top_dir/kernel_platform/build/
+
+git clone https://android.googlesource.com/kernel/build
+
+mv build kernel
+
+mkdir -vp $top_dir/kernel_platform/prebuilts/
+
+cd $top_dir/kernel_platform/prebuilts/
+
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools/
+
+mkdir -vp $top_dir/prebuilts/clang/host/
+
+cd $top_dir/prebuilts/clang/host/
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp $top_dir/prebuilts/gcc/linux-x86/host
+
+cd $top_dir/prebuilts/gcc/linux-x86/host
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+mkdir -vp $top_dir/prebuilts/gas/
+
+cd $top_dir/prebuilts/gas/
+
+git clone https://android.googlesource.com/platform/prebuilts/gas/linux-x86
+
+cd $top_dir/kernel_platform
+
+git clone https://android.googlesource.com/kernel/common
+
+Download kernel source code. Rename kernel-msm folder to $top_dir/kernel_platform/msm-kernel
+
+====================================
+
+export KERNEL_VARIANT=perf
+export TARGET_PRODUCT=mona
+export TARGET_BOARD_PLATFORM='parrot'
+export KERNEL_DIR=./msm-kernel
+
+export ANDROID_BUILD_TOP=$PWD
+export ROOT_DIR=$PWD/kernel_platform
+export ANDROID_KP_OUT_DIR="${ROOT_DIR}/out/msm-kernel-${TARGET_BOARD_PLATFORM}-${KERNEL_VARIANT}"
+export ANDROID_EXT_MODULES_COMMON_OUT=$ANDROID_BUILD_TOP/out/target/product/$TARGET_PRODUCT/obj/DLKM_OBJ
+export ANDROID_EXT_MODULES_OUT=${ANDROID_EXT_MODULES_COMMON_OUT}/kernel_platform
+export DIST_DIR=${ANDROID_KP_OUT_DIR}/dist
+export HOST_DIR=${ANDROID_KP_OUT_DIR}/host
+export UNSTRIPPED_DIR=${DIST_DIR}/unstripped
+export MODULES_STAGING_DIR=${ANDROID_EXT_MODULES_OUT}/staging
+export MODULES_PRIVATE_DIR=${ANDROID_EXT_MODULES_OUT}/private
+export MODULE_UAPI_HEADERS_DIR=${ANDROID_EXT_MODULES_OUT}/module_uapi_headers
+export KP_OUT_DIR=${ANDROID_EXT_MODULES_OUT}
+export CLANG_TRIPLE= CROSS_COMPILE= CROSS_COMPILE_COMPAT= CROSS_COMPILE_ARM32= ARCH=arm64 SUBARCH= MAKE_GOALS="modules dtbs"
+export AARCH64_NDK_TRIPLE="aarch64-linux-android31" ARM_NDK_TRIPLE="arm-linux-androideabi31" BUILDTOOLS_PREBUILT_BIN="build/kernel/build-tools/path/linux-x86" CLANG_PREBUILT_BIN="prebuilts/clang/host/linux-x86/clang-r510928/bin"
+export HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf OBJSIZE=llvm-size STRIP=llvm-strip KCFLAGS=" -D__ANDROID_COMMON_KERNEL__"
+export CC_LD_ARG="LLVM=1 DEPMOD=depmod DTC=$ROOT_DIR/build/kernel/build-tools/path/linux-x86/dtc"
+export MAKE_ARGS=''
+export MAKEFLAGS='-j96'
+export USERCFLAGS="--target=aarch64-linux-android31 --sysroot=${ROOT_DIR}/prebuilts/ndk-r26/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Wno-unused-function"
+
+export USERLDFLAGS="-fuse-ld=lld --rtlib=compiler-rt --target=aarch64-linux-android31"
+export KCPPFLAGS="-ffile-prefix-map=${ROOT_DIR}/${KERNEL_DIR}/= -ffile-prefix-map=${ROOT_DIR}/="
+export LD_LIBRARY_PATH="${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64"
+export HOSTCFLAGS="--sysroot=${ROOT_DIR}/build/kernel/build-tools/sysroot -I${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/include "
+export HOSTLDFLAGS="--sysroot=${ROOT_DIR}/build/kernel/build-tools/sysroot -L ${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt "
+export SUBTARGET_REGEX=".*"
+export DIST_BINS="
+build/android/merge_dtbs.py
+build/build-tools/path/linux-x86/ufdt_apply_overlay
+"
+export OUT_DIR=${ANDROID_EXT_MODULES_OUT}/${KERNEL_DIR}
+
+HOST_TOOLS=${OUT_DIR}/host_tools
+mkdir -vp ${HOST_TOOLS}
+ln -sf /usr/bin/bash ${HOST_TOOLS}
+ln -sf /usr/bin/git ${HOST_TOOLS}
+ln -sf /usr/bin/perl ${HOST_TOOLS}
+ln -sf /usr/bin/rsync ${HOST_TOOLS}
+ln -sf /usr/bin/sh ${HOST_TOOLS}
+ln -sf ${ROOT_DIR}/build/kernel/build-tools/path/linux-x86/install ${HOST_TOOLS}
+
+PATH=${ANDROID_EXT_MODULES_OUT}/host/bin:${ROOT_DIR}/build/kernel/build-tools/path/linux-x86:${ROOT_DIR}/tools/libufdt/utils/src:${ROOT_DIR}/prebuilts/clang/host/linux-x86/clang-r510928/bin:${ROOT_DIR}/../out/target/product/mona/obj/DLKM_OBJ/kernel_platform/msm-kernel/host_tools
+
+MOTO_TARGET_DEFCONFIG=${ROOT_DIR}/${KERNEL_DIR}/arch/$ARCH/configs/vendor/ext_config/moto_fragment.config
+if [ ! -f ${MOTO_TARGET_DEFCONFIG} ]; then
+cat kernel_platform/msm-kernel/arch/$ARCH/configs/vendor/ext_config/moto-$TARGET_BOARD_PLATFORM.config kernel_platform/msm-kernel/arch/$ARCH/configs/vendor/ext_config/moto-$TARGET_BOARD_PLATFORM-$TARGET_PRODUCT.config kernel_platform/msm-kernel/arch/$ARCH/configs/vendor/ext_config/moto-$TARGET_BOARD_PLATFORM-$KERNEL_VARIANT.config >> ${MOTO_TARGET_DEFCONFIG}
+fi
+
+MOTO_TARGET_PRODUCT_BZL=${ROOT_DIR}/${KERNEL_DIR}/moto_product.bzl
+if [ ! -f ${MOTO_TARGET_PRODUCT_BZL} ]; then
+echo "# this is auto generated moto kernel product config" > $MOTO_TARGET_PRODUCT_BZL
+echo "mmi_product_name = \"$TARGET_PRODUCT\"" >> $MOTO_TARGET_PRODUCT_BZL
+echo "mmi_product_type = \"$TARGET_PRODUCT\"" >> $MOTO_TARGET_PRODUCT_BZL
+fi
+if [ ! -f $ROOT_DIR/build.config ]; then
+echo """[ -z \"\${VARIANT}\" ] && VARIANT=perf
+KERNEL_DIR=./msm-kernel
+. ./msm-kernel/build.config.msm.parrot
+""" | tee $ROOT_DIR/build.config
+fi
+
+cd ${ROOT_DIR}
+
+ln -s ../msm-kernel/msm_kernel_extensions.bzl build/msm_kernel_extensions.bzl
+ln -fs ../vendor;ln -fs ../motorola
+
+export build_flags=("--//msm-kernel:skip_abl=true" "--//msm-kernel:skip_abi=true" "--user_kmi_symbol_lists=//msm-kernel:android/abi_gki_aarch64_qcom" "--ignore_missing_projects" "--incompatible_sandbox_hermetic_tmp=false" "--nozstd_dwarf_compression")
+
+$ROOT_DIR/tools/bazel query --ui_event_filters=-info --noshow_progress 'filter("parrot_perf_.*_dist$", attr(generator_function, define_msm_platforms, msm-kernel/...))'
+$ROOT_DIR/tools/bazel --output_user_root=$ROOT_DIR/../bazel-cache build ${build_flags[@]} //msm-kernel:parrot_perf_dist //msm-kernel:parrot_perf_dtc_dist
+$ROOT_DIR/tools/bazel --output_user_root=$ROOT_DIR/../bazel-cache run ${build_flags[@]} //msm-kernel:parrot_perf_dist -- --dist_dir "$DIST_DIR"
+$ROOT_DIR/tools/bazel --output_user_root=$ROOT_DIR/../bazel-cache run ${build_flags[@]} //msm-kernel:parrot_perf_dtc_dist -- --dist_dir "$HOST_DIR"
+
+cp -p ${DIST_DIR}/.config ${OUT_DIR}/.
+cp -p ${DIST_DIR}/System.map ${OUT_DIR}/.
+cp -p ${DIST_DIR}/Image* ${OUT_DIR}/.
+cp -p ${DIST_DIR}/modules* ${OUT_DIR}/.
+cp -p ${DIST_DIR}/vmlinux* ${OUT_DIR}/.
+cp -p ${DIST_DIR}/Module.symvers ${OUT_DIR}/.
+################################################################################
+
+# setting up Android tree for compiling modules
+
+mkdir -p ${OUT_DIR}/
+
+cd ${ROOT_DIR}/${KERNEL_DIR}
+
+make O=${OUT_DIR} ${CC_LD_ARG} ${MAKE_ARGS} olddefconfig
+KCONFIG_NOSILENTUPDATE=1 make ${MAKEFLAGS} O=${OUT_DIR} ${CC_LD_ARG} ${MAKE_ARGS} modules_prepare
+
+################################################################################
+
+# Compiling vendor devicetree overlays
+
+cd ${ROOT_DIR}
+MAKE_ARGS="dtbs KBUILD_MIXED_TREE=${DIST_DIR}"
+
+for project in $(cd ${ANDROID_BUILD_TOP} && find -L vendor/ -type d -name "*-devicetree");  do
+if [ -e "${ANDROID_BUILD_TOP}/${project}/Makefile" ]; then
+cd ${ROOT_DIR}&& EXT_MODULES=../${project}
+mkdir -p ${ANDROID_EXT_MODULES_OUT}/${EXT_MODULES}
+make -j48 -C ${EXT_MODULES} M=../${EXT_MODULES} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} ${CC_LD_ARG} ${MAKE_ARGS}
+fi
+done
+
+################################################################################
+
+# Qcom DLKM
+
+cd ${ROOT_DIR}
+
+QCOM_DLKM_MODULES=("wlan/platform" "display-drivers" "vendor/st/opensource/driver" "vendor/nxp/opensource/driver" "dataipa" "datarmnet" "wlan/qcacld-3.0" "datarmnet-ext/sch" "datarmnet-ext/shs" "datarmnet-ext/wlan" "datarmnet-ext/perf_tether" "datarmnet-ext/perf" "datarmnet-ext/aps" "graphics-kernel" "mm-drivers/msm_ext_display" "datarmnet-ext/mem" "datarmnet-ext/offload" "securemsm-kernel" "audio-kernel")
+for EXT_MOD in ${QCOM_DLKM_MODULES[@]};do
+dlkm_build_flags=("${build_flags[@]}")
+if [[ "$EXT_MOD" == *opensource/driver ]]; then
+EXT_MOD_REL=${EXT_MOD}
+else
+EXT_MOD_REL=vendor/qcom/opensource/${EXT_MOD}
+fi
+echo "$EXT_MOD_REL"
+ALLOW_UNSAFE_DDK_HEADERS=$(awk -F'LOCAL_MODULE_DDK_ALLOW_UNSAFE_HEADERS := ' '/LOCAL_MODULE_DDK_ALLOW_UNSAFE_HEADERS := / {print $2}' $EXT_MOD_REL/Android.mk)
+if [ "$ALLOW_UNSAFE_DDK_HEADERS" != '' ]; then
+dlkm_build_flags+=("--allow_ddk_unsafe_headers")
+fi
+if [ $EXT_MOD_REL == 'vendor/qcom/opensource/wlan/qcacld-3.0' ]; then
+SUBTARGET_REGEX='all.*'
+else
+SUBTARGET_REGEX=".*"
+fi
+echo "$ALLOW_UNSAFE_DDK_HEADERS:$SUBTARGET_REGEX"
+filter_regex="${TARGET_BOARD_PLATFORM/_/-}_${KERNEL_VARIANT/_/-}_${SUBTARGET_REGEX:-.*}_dist$"
+echo "$filter_regex"
+pkg_path="$EXT_MOD_REL";until [ -f "${pkg_path}/BUILD.bazel" ]; do pkg_path="$(dirname "$pkg_path")";done
+echo "$filter_regex:$pkg_path"
+build_target=$(./tools/bazel query --ui_event_filters=-info --noshow_progress "filter('${filter_regex}', //${pkg_path}/...)")
+echo "./tools/bazel query --ui_event_filters=-info --noshow_progress \"filter('${filter_regex}', //${pkg_path}/...)\" $build_target"
+echo "$build_target:./tools/bazel query --ui_event_filters=-info --noshow_progress \"filter('${filter_regex}', //${pkg_path}/...)\" $build_target"
+./tools/bazel run ${dlkm_build_flags[@]} "$build_target" -- --dist_dir="${ANDROID_EXT_MODULES_COMMON_OUT}/${EXT_MOD_REL}"
+echo "./tools/bazel run ${dlkm_build_flags[@]} \"$build_target\" -- --dist_dir=\"${ANDROID_EXT_MODULES_COMMON_OUT}/${EXT_MOD_REL}\""
+done
+
+make -j48 -C ..//vendor/qcom/opensource/mm-drivers/sync_fence M=../../vendor/qcom/opensource/mm-drivers/sync_fence KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR}  ${CC_LD_ARG} SYNC_FENCE_ROOT=./vendor/qcom/opensource/mm-drivers/sync_fence MODNAME=sync_fence BOARD_PLATFORM=parrot KBUILD_MIXED_TREE=${DIST_DIR}
+
+make -j48 -C ..//vendor/qcom/opensource/bt-kernel M=../../vendor/qcom/opensource/bt-kernel KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR}  ${CC_LD_ARG} BT_KERNEL_ROOT=\${ROOT\_DIR}/vendor/qcom/opensource/bt-kernel CONFIG_MSM_BT_POWER=m CONFIG_I2C_RTC6226_QCA=m CONFIG_BTFM_SLIM=m KBUILD_MIXED_TREE=${DIST_DIR}
+
+make -j48 -C ..//vendor/qcom/opensource/dsp-kernel M=../../vendor/qcom/opensource/dsp-kernel KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR}  ${CC_LD_ARG} KBUILD_MIXED_TREE=${DIST_DIR}
+
+make -j48 -C ..//vendor/qcom/opensource/mmrm-driver M=../../vendor/qcom/opensource/mmrm-driver KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR}  ${CC_LD_ARG} MMRM_ROOT=${ROOT_DIR}/../vendor/qcom/opensource/mmrm-driver BOARD_PLATFORM=parrot KBUILD_MIXED_TREE=${DIST_DIR}
+
+make -j48 -C ..//vendor/qcom/opensource/camera-kernel M=../../vendor/qcom/opensource/camera-kernel KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} ${CC_LD_ARG} CAMERA_KERNEL_ROOT=./vendor/qcom/opensource/camera-kernel KERNEL_ROOT=./kernel_platform/common MODNAME=camera BOARD_PLATFORM=parrot KBUILD_EXTRA_SYMBOLS=${ANDROID_EXT_MODULES_COMMON_OUT}/vendor/qcom/opensource/mmrm-driver/Module.symvers KBUILD_EXTRA_CONFIGS=./vendor/qcom/opensource/mmrm-driver/config/waipiommrm.conf KBUILD_MIXED_TREE=${DIST_DIR}
+
+make -j48 -C ..//vendor/qcom/opensource/video-driver M=../../vendor/qcom/opensource/video-driver KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR}  ${CC_LD_ARG} VIDEO_ROOT=${ROOT_DIR}/../vendor/qcom/opensource/video-driver CONFIG_MSM_VIDC_V4L2=m KBUILD_EXTRA_SYMBOLS=${ANDROID_EXT_MODULES_COMMON_OUT}/vendor/qcom/opensource/mmrm-driver/Module.symvers KBUILD_MIXED_TREE=${DIST_DIR}
+
+################################################################################
+
+# Moto DLKM
+
+mkdir -vp ${OUT_DIR}/../../vendor/qcom/opensource/display-drivers/msm
+cp ${OUT_DIR}/../../vendor/qcom/opensource/display-drivers/parrot_perf_display_drivers_Module.symvers ${OUT_DIR}/../../vendor/qcom/opensource/display-drivers/msm/Module.symvers
+
+cd ${ROOT_DIR}
+
+export MAKE_ARGS="CHANGE_STACK_FRAME_SIZE=y CONFIG_AW96XX_POWER_SUPPLY_ONLINE=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_BUILD_FOR_ANDROID_V=y CONFIG_BUILD_KERNEL_VARIANT_PERF=y CONFIG_CHIPONE_LOG_CAPTURE=y CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS=y CONFIG_ENABLE_TP_ILI_LOG_CAPTURE=y CONFIG_FOCALTECH_LAST_TIME=y CONFIG_FTS_LAST_TIME=y CONFIG_GTP_GHOST_LOG_CAPTURE=y CONFIG_GTP_LAST_TIME=y CONFIG_HYBRIDSWAP=y CONFIG_HYBRIDSWAP_CORE=y CONFIG_HYBRIDSWAP_SWAPD=y CONFIG_HYBRIDSWAP_ZRAM=y CONFIG_ILI_DEBUG_INFO=y CONFIG_ILI_TOUCH_LAST_TIME=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_NOTIFY_TOUCH_STATE=y CONFIG_INPUT_CYTTSP5_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_NOTIFY_TOUCH_STATE=y CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3681 CONFIG_INPUT_FOCALTECH_V3_MMI_PEN_NOTIFIER=y CONFIG_INPUT_FOCAL_IC_NAME=ft3681 CONFIG_INPUT_GTP_PASSIVE_PEN_NOTIFIER=y CONFIG_INPUT_ILITEK_MMI_PEN_NOTIFIER=y CONFIG_INPUT_ILI_0FLASH_MMI_NOTIFY_TOUCH_STATE=y CONFIG_INPUT_ILI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_ILI_SET_TOUCH_STATE=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_0FLASH_MMI_NOTIFY_TOUCH_STATE=y CONFIG_INPUT_NOVA_0FLASH_MMI_PEN_NOTIFIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_MOTO_MUTEX_INHERIT=y CONFIG_MOTO_RWSEM_INHERIT=y CONFIG_NOVA_TOUCH_LAST_TIME=y CONFIG_SGM4154X_CHARGER_NAME= CONFIG_STOWED_MODE_EN=y CONFIG_SX937X_USB_CAL=y CONFIG_SYSFS_IMPORT_REMOVE_SELF=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT=y CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS_API=y CONFIG_USE_MMI_CHARGER=y CTS_MULTI_TP_MODULE_EN=y MODULE_KERNEL_VERSION=5.15 TARGET_BUILD_VARIANT=user TOUCHSCREEN_PM_BRL_SPI=y KBUILD_MIXED_TREE=${DIST_DIR}"
+
+FM_DRIVER_PATH="fm"
+MMAP_DRIVER_PATH="moto_mmap_fault"
+
+export MOTO_EXT_MODULES=("backlight/aw99703" "backlight/ktd3136" "ese/st54x" "fm" "input/misc/anc_fps_mmi" "input/misc/fpc_fps_mmi" "input/touchscreen/chipone_tddi_v3_mmi" "input/touchscreen/ilitek_v4_mmi" "misc/awinic/sarsensor" "misc/mmi_lpm_dbg" "misc/mmi_sys_temp" "misc/sx937x" "misc/utag" "mmi_annotate" "mmi_info" "mmi_relay" "moto_binder" "moto_f_usbnet" "moto_mm" "moto_mmap_fault" "moto_netopt/con_dfpar" "moto_reboot_reason" "moto_sched" "moto_swap" "nfc/st21nfc" "power/bm_adsp_ulog" "power/mmi_charger" "power/qpnp_adaptive_charge" "power/qti_glink_charger" "sensors" "watchdogtest")
+
+for EXT_MODULES in ${MOTO_EXT_MODULES[@]}; do
+KCFLAGS=""
+case "$EXT_MODULES" in
+*"$FM_DRIVER_PATH"*)
+KCFLAGS="-DSUPPORT_FM_ELNA_LDO"
+;;
+*"$MMAP_DRIVER_PATH"*)
+KCFLAGS="-DTUNE_MMAP_READAROUND"
+;;
+esac
+if [ -n "$KCFLAGS" ]; then
+MAKE_ARGS+= " KCFLAGS=${KCFLAGS}"
+fi
+EXT_MOD=..//motorola/kernel/modules/drivers/${EXT_MODULES}
+EXT_MOD_REL=../$EXT_MOD
+mkdir -p ${OUT_DIR}/${EXT_MOD_REL}
+make -j48 -C ${EXT_MOD} M=${EXT_MOD_REL} KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} ${CC_LD_ARG} ${MAKE_ARGS}
+done
