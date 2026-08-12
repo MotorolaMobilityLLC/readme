@@ -1,0 +1,78 @@
+MMI-U3UC34.63-31-6 For vienna
+
+Kernel Modules:
+---------------
+
+KERNEL_ROOT_DIR=$PWD
+
+git clone --depth 1 https://android.googlesource.com/kernel/prebuilts/build-tools kernel/prebuilts/kernel-build-tools
+
+git clone --depth 1 https://android.googlesource.com/toolchain/prebuilts/ndk/r23 kernel/prebuilts/ndk-r23
+
+git clone --depth 1 https://android.googlesource.com/platform/prebuilts/jdk/jdk11 kernel/prebuilts/jdk/jdk11
+
+git clone --depth 1 https://android.googlesource.com/platform/prebuilts/bazel/linux-x86_64 kernel/prebuilts/bazel/linux-x86_64
+
+git clone --depth 1 https://android.googlesource.com/platform/prebuilts/build-tools kernel/prebuilts/build-tools
+
+git clone --depth 1 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 kernel/prebuilts/clang/host/linux-x86
+
+git clone --depth 1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8 kernel/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+git clone --depth 1 https://android.googlesource.com/platform/build/bazel_common_rules kernel/build/bazel_common_rules
+
+git clone --depth 1 https://android.googlesource.com/platform/external/bazel-skylib kernel/external/bazel-skylib
+
+git clone --depth 1 https://android.googlesource.com/platform/external/stardoc kernel/external/stardoc
+
+Download kernel source code:kernel-mtk,kernel/kernel_device_modules-6.1,
+
+Download kernel build source code:kernel/build/bazel_mgk_rules, kernel/build/kernel
+
+Rename kernel-mtk folder to $top_dir/kernel-6.1
+
+TARGET_PRODUCT=aito
+
+KERNEL_DEFCONFIG="mgk_64_k61_defconfig"
+
+KERNEL_EXTRA_CONFIG="moto-mgk_64_k61-aito"
+
+KERNEL_BUILD_VARIANT=user
+
+KERNEL_TARGET_ARCH=arm64
+
+KERNEL_DIR="kernel/kernel_device_modules-6.1"
+
+LINUX_KERNEL_VERSION="kernel-6.1"
+
+KERNEL_DEFCONFIG_OVERLAYS="moto-mgk_64_k61.config moto-mgk_64_k61-aito.config moto-mgk_64_k61-df.config"
+
+KERNEL_BAZEL_BUILD_OUT=out/target/product/${TARGET_PRODUCT}/obj/KLEAF_OBJ
+
+KERNEL_BAZEL_DIST_OUT=out/target/product/${TARGET_PRODUCT}/obj/KLEAF_OBJ/dist
+
+export BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1 DEFCONFIG_OVERLAYS="moto-mgk_64_k61.config moto-mgk_64_k61-aito.config moto-mgk_64_k61-df.config" KERNEL_VERSION=kernel-6.1 SOURCE_DATE_EPOCH=0
+
+PRIVATE_BAZEL_BUILD_FLAG="--//build/bazel_mgk_rules:kernel_version=${LINUX_KERNEL_VERSION#kernel-} --experimental_writable_outputs --config=stamp --repo_manifest=${KERNEL_ROOT_DIR}/${KERNEL_DIR}/fake_manifest.xml"
+
+my_kernel_target=${KERNEL_DEFCONFIG%_defconfig}
+
+PRIVATE_BAZEL_BUILD_GOAL="//${KERNEL_DIR#kernel/}:${my_kernel_target}_customer_modules_install.${KERNEL_BUILD_VARIANT}"
+
+PRIVATE_BAZEL_DIST_GOAL="//${KERNEL_DIR#kernel/}:${my_kernel_target}_customer_dist.${KERNEL_BUILD_VARIANT}"
+
+mkdir -p kernel/kernel_device_modules-6.1/kernel/configs/
+
+cp -f ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/arch/arm64/configs/ext_config/moto-mgk_64_k61.config ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/kernel/configs/moto-mgk_64_k61.config
+
+cp -f ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/arch/arm64/configs/ext_config/moto-mgk_64_k61-df.config ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/kernel/configs/moto-mgk_64_k61-df.config
+
+cp -f ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/arch/arm64/configs/ext_config/moto-mgk_64_k61-nice.config ${KERNEL_ROOT_DIR}/kernel/kernel_device_modules-6.1/kernel/configs/moto-mgk_64_k61-nice.config
+
+cd ${KERNEL_ROOT_DIR}/kernel
+
+tools/bazel --output_root=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT} --output_base=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT}/bazel/output_user_root/output_base build ${PRIVATE_BAZEL_BUILD_FLAG} ${PRIVATE_BAZEL_BUILD_GOAL}
+
+tools/bazel --output_root=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT} --output_base=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT}/bazel/output_user_root/output_base run ${PRIVATE_BAZEL_BUILD_FLAG} --nokmi_symbol_list_violations_check ${PRIVATE_BAZEL_DIST_GOAL} -- --dist_dir=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_DIST_OUT}
+
+tools/bazel --output_root=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT} --output_base=${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_BUILD_OUT}/bazel/output_user_root/output_base run //${LINUX_KERNEL_VERSION}:kernel_aarch64_abi_dist -- --dist_dir==${KERNEL_ROOT_DIR}/${KERNEL_BAZEL_DIST_OUT}/abi
