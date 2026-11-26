@@ -1,0 +1,271 @@
+W3WZ36.54-93-2 For Moto G
+
+Kernel Modules:
+---------------
+
+Download prebuilts folder from Android distribution. Move it to $my_top_dir
+
+For example:
+
+my_top_dir=$PWD
+
+mkdir -vp $my_top_dir/kernel
+
+cd $my_top_dir/kernel
+
+git clone https://android.googlesource.com/kernel/build
+
+mkdir -vp $my_top_dir/kernel_platform/prebuilts/
+
+cd $my_top_dir/kernel_platform/prebuilts/
+
+git clone https://android.googlesource.com/kernel/prebuilts/build-tools
+
+mkdir -vp $my_top_dir/kernel/prebuilts-master/clang/host/
+
+cd $my_top_dir/kernel/prebuilts-master/clang/host/
+
+git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/arm/
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/arm
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9.1
+
+mkdir -vp  $my_top_dir/prebuilts/gcc/linux-x86/host/
+
+cd $my_top_dir/prebuilts/gcc/linux-x86/host/
+
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8
+
+Download kernel source code. Rename kernel-mtk folder to $my_top_dir/kernel-5.15
+
+TOP_DIR=$PWD
+
+export ROOT_DIR=${TOP_DIR}/kernel
+
+KERNEL_DIR=kernel-5.15
+
+BUILD_TARGET=sydnyl
+
+MAKE_GOALS='all Image.lz4 vmlinux'
+
+export KCFLAGS=' -D__ANDROID_COMMON_KERNEL__'
+
+export REL_GEN_BUILD_CONFIG_DIR=../out/target/product/generic/obj/KERNEL_OBJ
+
+export COMMON_OUT_DIR=${TOP_DIR}/out/target/product/generic/obj/KERNEL_OBJ
+
+export OUT_DIR=${COMMON_OUT_DIR}/${KERNEL_DIR}
+
+export DIST_DIR=${COMMON_OUT_DIR}/dist
+
+export MODULES_STAGING_DIR=${COMMON_OUT_DIR}/staging
+
+export KERNEL_UAPI_HEADERS_DIR=${COMMON_OUT_DIR}/kernel_uapi_headers
+
+export USERCFLAGS='--target=aarch64-linux-android31 --sysroot=${ROOT_DIR}/prebuilts/ndk-r23/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Wno-unused-function '
+
+export USERLDFLAGS='-fuse-ld=lld --rtlib=compiler-rt --target=aarch64-linux-android31 '
+
+export KCPPFLAGS='-ffile-prefix-map=${ROOT_DIR}/kernel-5.15/= -ffile-prefix-map=${ROOT_DIR}/='
+
+export HOSTCFLAGS='--sysroot=${ROOT_DIR}/build/kernel/build-tools/sysroot  -I${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/include '
+
+export HOSTLDFLAGS='--sysroot=${ROOT_DIR}/build/kernel/build-tools/sysroot  -Wl,-rpath,${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 -L ${ROOT_DIR}/prebuilts/kernel-build-tools/linux-x86/lib64 -fuse-ld=lld --rtlib=compiler-rt'
+
+export PATH=${ROOT_DIR}/build/kernel/build-tools/path/linux-x86:${ROOT_DIR}/prebuilts/clang/host/linux-x86/clang-r450784e/bin::/usr/bin:${ROOT_DIR}/../prebuilts/perl/linux-x86/bin/perl
+
+export HOSTCC=clang HOSTCXX=clang++ CC=clang LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump OBJSIZE=llvm-size READELF=llvm-readelf STRIP=llvm-strip AS=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- TOOL_ARGS='LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc'
+
+mkdir -p ${OUT_DIR} ${DIST_DIR} ${ROOT_DIR}/kernel-5.15/kernel/configs ${KERNEL_UAPI_HEADERS_DIR}/usr
+
+cat kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515.config kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515-${BUILD_TARGET}.config kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515-df.config  >> ${ROOT_DIR}/kernel-5.15/kernel/configs/moto_extra.config
+
+ln -fs  ${ROOT_DIR}/kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515.config ${ROOT_DIR}/kernel-5.15/kernel/configs/moto-mgk_64_k515.config
+
+ln -fs  ${ROOT_DIR}/kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515-df.config ${ROOT_DIR}/kernel-5.15/kernel/configs/moto-mgk_64_k515-df.config
+
+ln -fs  ${ROOT_DIR}/kernel-5.15/arch/arm64/configs/ext_config/moto-mgk_64_k515-${BUILD_TARGET}.config ${ROOT_DIR}/kernel-5.15/kernel/configs/moto-mgk_64_k515-${BUILD_TARGET}.config
+
+cd ${ROOT_DIR} && python kernel-5.15/scripts/gen_build_config.py --kernel-defconfig mgk_64_k515_defconfig --kernel-defconfig-overlays "entry_level.config moto-mgk_64_k515.config moto-mgk_64_k515-${BUILD_TARGET}.config moto-mgk_64_k515-df.config" --kernel-build-config-overlays "" -m user -o ${COMMON_OUT_DIR}/build.config
+
+cp -p ${KERNEL_DIR}/arch/arm64/configs/mgk_64_k515_defconfig ${COMMON_OUT_DIR}/mgk_64_k515.config
+
+DEFCONFIG="gki_defconfig ../../../../kernel/${REL_GEN_BUILD_CONFIG_DIR}/mgk_64_k515.config entry_level.config moto-mgk_64_k515.config moto-mgk_64_k515-${BUILD_TARGET}.config moto-mgk_64_k515-df.config"
+
+cd ${KERNEL_DIR}
+
+make -j48 ${TOOL_ARGS} O=${OUT_DIR} ${DEFCONFIG}
+
+make -j48 O=${OUT_DIR} ${TOOL_ARGS} ${MAKE_GOALS}
+
+make -j48 O=${OUT_DIR} ${TOOL_ARGS} INSTALL_MOD_PATH=${MODULES_STAGING_DIR} modules_install
+
+make -j48 -C ${OUT_DIR} O=${OUT_DIR} ${TOOL_ARGS} INSTALL_HDR_PATH=${KERNEL_UAPI_HEADERS_DIR}/usr headers_install
+
+---
+
+cd ${TOP_DIR}
+mkdir -vp ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_evb
+mkdir -vp ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_dvt
+
+vendor/mediatek/proprietary/tools/dct/python/DrvGen.py vendor/mediatek/proprietary/tools/dct/dws/mt6835/sydnyl_evb.dws ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_evb ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_evb cust_dtsi
+vendor/mediatek/proprietary/tools/dct/python/DrvGen.py vendor/mediatek/proprietary/tools/dct/dws/mt6835/sydnyl_dvt.dws ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_dvt ${OUT_DIR}/arch/arm64/boot/dts/sydnyl_dvt cust_dtsi
+
+cd -
+DTB_DEFCONFIG="gki_defconfig ../../../../kernel/${REL_GEN_BUILD_CONFIG_DIR}/mgk_64_k515.config moto-mgk_64_k515.config moto-mgk_64_k515-df.config"
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-evb-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-evb-overlay.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-evb-sku3-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-evb-sku3-overlay.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-evb-sku6-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-evb-sku6-overlay.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-dvt-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-dvt-overlay.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-dvt-sku3-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-dvt-sku3-overlay.dtb
+make -j96 LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc O=${OUT_DIR} mediatek/mt6835-sydnyl-dvt-sku6-overlay.dtb  ${DTB_DEFCONFIG}
+make -j96 O=${OUT_DIR} 'LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc' mediatek/mt6835-sydnyl-dvt-sku6-overlay.dtb
+
+All MTK DLKM module:
+====================
+
+MODULES=(
+"fpsgo_cus"
+"met_drv_v3"
+"connectivity/common"
+"connectivity/conninfra"
+"connectivity/connfem"
+"connectivity/gps/gps_stp"
+"connectivity/gps/data_link/plat/v010"
+"connectivity/gps/data_link/plat/v030"
+"connectivity/gps/data_link/plat/v050"
+"connectivity/gps/data_link/plat/v051"
+"connectivity/gps/data_link/plat/v060"
+"connectivity/gps/data_link/plat/v061"
+"connectivity/gps/gps_pwr"
+"connectivity/gps/gps_scp"
+"gpu"
+"connectivity/fmradio"
+"connectivity/wlan/adaptor"
+"connectivity/wlan/adaptor/wlan_page_pool"
+"connectivity/bt/linux_v2"
+"hbt_driver_cus"
+)
+
+for module in "${MODULES[@]}"; do
+MODULE_PATH="../vendor/mediatek/kernel_modules/${module}"
+eval "make -j96 KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc -C ${MODULE_PATH} M=${MODULE_PATH}"
+eval "make -j96 KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc -C ${MODULE_PATH} M=${MODULE_PATH} INSTALL_MOD_PATH=${MODULES_STAGING_DIR} INSTALL_MOD_DIR=extra/../vendor/mediatek/kernel_modules/ INSTALL_HDR_PATH=${KERNEL_UAPI_HEADERS_DIR}/usr modules_install"
+done
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor/wlan_page_pool AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h MODULE_NAME=wlan_page_pool src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor/wlan_page_pool
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/connfem AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/connfem
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h CONNAC_VER=3_0 MODULE_NAME=wmt_chrdev_wifi_connac3 src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/conninfra AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/conninfra
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/common AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h MTK_CONSYS_ADIE= MTK_PLATFORM_WMT= TARGET_BOARD_PLATFORM_WMT=common src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/common
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/conninfra/Module.symvers CONNAC_VER=2_0 MODULE_NAME=wmt_chrdev_wifi_connac2 src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/common/Module.symvers CONNAC_VER=1_0 MODULE_NAME=wmt_chrdev_wifi src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/wmt AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/common/Module.symvers BT_PLATFORM=connac1x LOG_TAG=[BT_Drv][wmt] BT_ENABLE_LOW_POWER_DEBUG=y src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/wmt
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS="${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/adaptor/Module.symvers ${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/common/Module.symvers" CONFIG_MTK_COMBO_WIFI_HIF=axi MODULE_NAME=wlan_drv_gen4m_6835 MTK_COMBO_CHIP=SOC2_1X1 WLAN_CHIP_ID=6835 MTK_ANDROID_WMT=y WIFI_ENABLE_GCOV= WIFI_IP_SET=1 MTK_ANDROID_EMI=y WLAN_CONNAC3_DEV= CONNAC_VER=1_0 MTK_WLAN_SERVICE=yes CONFIG_MTK_WIFI_MDDP_SUPPORT= CONFIG_MTK_WIFI_CCCI_SUPPORT= CONFIG_MTK_WIFI_DRIVER_OWN_DELAY_SUPPORT= CONFIG_MTK_HOST_OFFLOAD_SUPPORT= CONFIG_WLAN_MT6985_MP2= CONFIG_WLAN_MT6985_MP2_LP= src=${ROOT_DIR}/../vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m
+
+---
+
+MODULES=(
+"drivers/backlight/aw99703"
+"drivers/backlight/ktd3136"
+"drivers/regulator/ocp2138"
+"drivers/usb/typec/aw35615"
+"drivers/usb/typec/aw35615fcr"
+"drivers/power/wt6670f_qc3p_mmi"
+"drivers/power/sc8989x_charger"
+"drivers/power/sgm415xx_mmi"
+"drivers/power/nu2115a_mmi"
+"drivers/power/sc8541_mmi"
+"drivers/power/bq25980_mmi"
+"drivers/usb/typec/sc2150"
+"drivers/usb/typec/cps8851"
+"drivers/usb/typec/upm7610"
+"drivers/power/cps4038_mmi"
+"drivers/misc/hall"
+"drivers/sensors"
+"drivers/power/mmi_pephv"
+"drivers/power/mmi_qns_system"
+)
+
+for module in "${MODULES[@]}"; do
+MODULE_PATH="../motorola/kernel/modules/${module}"
+eval "make -j96 KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc -C ${MODULE_PATH} M=${MODULE_PATH}"
+eval "make -j96 KERNEL_SRC=${ROOT_DIR}/${KERNEL_DIR} O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc -C ${MODULE_PATH} M=${MODULE_PATH} INSTALL_MOD_PATH=${MODULES_STAGING_DIR} INSTALL_MOD_DIR=extra/../motorola/kernel/modules/ INSTALL_HDR_PATH=${KERNEL_UAPI_HEADERS_DIR}/usr modules_install"
+done
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 M=${ROOT_DIR}/../motorola/kernel/modules/drivers/fm src=${ROOT_DIR}/../motorola/kernel/modules/drivers/fm
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/misc/anc_fps_mmi src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/misc/anc_fps_mmi
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/misc/goodix_fps_mmi AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/misc/goodix_fps_mmi
+
+COMMON_MAKE_ARGS="make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15"
+KBUILD_SYMBOLS="KBUILD_EXTRA_SYMBOLS="
+
+MAKE_ARGS=("CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y")
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/leds/leds-gpio src=${ROOT_DIR}/../motorola/kernel/modules/drivers/leds/leds-gpio ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/touchscreen_u_mmi src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/touchscreen_u_mmi ${KBUILD_SYMBOLS}${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors/Module.symvers ${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_relay/Module.symvers ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/omnivision_tcm_0flash_mmi src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/omnivision_tcm_0flash_mmi ${MAKE_ARGS[@]}"
+
+MAKE_ARGS+=("CONFIG_AW96XX_POWER_SUPPLY_ONLINE=y" "CONFIG_AW96XX_MTK_KERNEL5XX_CHARGER_TYPE=y")
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/mmi_stow src=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/mmi_stow ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/awinic/sarsensor src=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/awinic/sarsensor ${KBUILD_SYMBOLS}${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors/Module.symvers ${MAKE_ARGS[@]}"
+
+MAKE_ARGS+=("CONFIG_SX937X_USB_CAL=y" "CONFIG_SX937X_POWER_SUPPLY_ONLINE=y" "CONFIG_SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y")
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_mmap_fault src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_mmap_fault ${MAKE_ARGS[@]} KCFLAGS=-DTUNE_MMAP_READAROUND"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_relay src=${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_relay ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_mm/mm src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_mm/mm ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_info src=${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_info ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/utag src=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/utag ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_f_usbnet src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_f_usbnet ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/sx937x src=${ROOT_DIR}/../motorola/kernel/modules/drivers/misc/sx937x ${KBUILD_SYMBOLS}${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors/Module.symvers ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_binder src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_binder ${MAKE_ARGS[@]}"
+
+MAKE_ARGS+=("KCFLAGS=-DTUNE_MMAP_READAROUND" "CONFIG_MOTO_MUTEX_INHERIT=y" "CONFIG_MOTO_RWSEM_INHERIT=y")
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_sched src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_sched ${MAKE_ARGS[@]} LINUX_KERNEL_VERSION=kernel-5.15"
+
+MAKE_ARGS+=("LINUX_KERNEL_VERSION=kernel-5.15" "CONFIG_HYBRIDSWAP_ZRAM=y" "CONFIG_HYBRIDSWAP=y" "CONFIG_HYBRIDSWAP_SWAPD=y" "CONFIG_HYBRIDSWAP_CORE=y" "CONFIG_ZRAM_EXT=y" "CONFIG_VENDOR_ZRAM_WRITEBACK=y")
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_swap5 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/moto_swap5 ${MAKE_ARGS[@]}"
+
+MAKE_ARGS+=("CONFIG_SEC_NFC_PRODUCT_N5=y" "CONFIG_SEC_NFC_PRODUCT_N5=y" "CONFIG_SEC_NFC_IF_I2C=y")
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/power/qpnp_adaptive_charge src=${ROOT_DIR}/../motorola/kernel/modules/drivers/power/qpnp_adaptive_charge ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors src=${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/nfc/st54lnfc/st54spi src=${ROOT_DIR}/../motorola/kernel/modules/drivers/nfc/st54lnfc/st54spi ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/sys_monitor src=${ROOT_DIR}/../motorola/kernel/modules/drivers/sys_monitor ${MAKE_ARGS[@]}"
+
+echo "$COMMON_MAKE_ARGS M=${ROOT_DIR}/../motorola/kernel/modules/drivers/nfc/st54lnfc/st21nfc src=${ROOT_DIR}/../motorola/kernel/modules/drivers/nfc/st54lnfc/st21nfc ${KBUILD_SYMBOLS}${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_info/Module.symvers ${MAKE_ARGS[@]}"
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/focaltech_touch_v3_u_mmi AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_GTP_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_INPUT_CHIPONE_IC_NAME=icnl9922c CONFIG_CHIPONE_MTK_CHECK_PANEL=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_CHIPONE_CHECK_DEVICE_BOOTMODE=y CONFIG_CTS_INPUT_ENABLE_DOUBLE_TAP=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_CTS_NOTIFY_TOUCH_STATE=y CONFIG_CTS_LAST_TIME=y CONFIG_INPUT_CHIPONE_IC_NAME=icnl9922c CONFIG_CHIPONE_MTK_CHECK_PANEL=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_CHIPONE_CHECK_DEVICE_BOOTMODE=y CONFIG_CTS_INPUT_ENABLE_DOUBLE_TAP=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_CTS_NOTIFY_TOUCH_STATE=y CONFIG_CTS_LAST_TIME=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_FTS_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_FTS_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_FOCALTECH_CS_SETUP=y CONFIG_FOCALTECH_LOG_CAPTURE=y CONFIG_FTS_CHECK_DEVICE_BOOTMODE_SUPPORT=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_FTS_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_FOCALTECH_CS_SETUP=y CONFIG_FOCALTECH_LOG_CAPTURE=y CONFIG_FTS_CHECK_DEVICE_BOOTMODE_SUPPORT=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_GTP_LAST_TIME=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_INPUT_FOCALTECH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft3683g CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_FTS_DOUBLE_TAP_CONTROL=y CONFIG_FTS_COMPATIBLE_WITH_GKI=y CONFIG_FTS_SUPPORT_HIGH_RESOLUTION=y CONFIG_FTS_LAST_TIME=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_INPUT_FOCAL_IC_NAME=ft3683g CONFIG_FOCALTECH_TOUCH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_FTS_DOUBLE_TAP_CONTROL=y CONFIG_FTS_SUPPORT_HIGH_RESOLUTION=y CONFIG_FTS_POWER_PMU_CONTROL=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_FTS_LAST_TIME=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_FTS_INPUT_ID=y ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/focaltech_touch_v3_u_mmi
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi_v3 AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors/Module.symvers CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_CHIPONE_CHECK_DEVICE_BOOTMODE=y CONFIG_CHIPONE_MTK_CHECK_PANEL=y CONFIG_CTS_INPUT_ENABLE_DOUBLE_TAP=y CONFIG_CTS_LAST_TIME=y CONFIG_CTS_NOTIFY_TOUCH_STATE=y CONFIG_ENABLE_TP_TM_ILI_LOG_CAPTURE=y CONFIG_FOCALTECH_CS_SETUP=y CONFIG_FOCALTECH_LOG_CAPTURE=y CONFIG_FOCALTECH_TOUCH_IC_NAME=ft3683g CONFIG_FTS_CHECK_DEVICE_BOOTMODE_SUPPORT=y CONFIG_FTS_COMPATIBLE_WITH_GKI=y CONFIG_FTS_DOUBLE_TAP_CONTROL=y CONFIG_FTS_INPUT_ID=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_FTS_LAST_TIME=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_POWER_PMU_CONTROL=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_FTS_SUPPORT_HIGH_RESOLUTION=y CONFIG_GOODIX_CHG_DETECTION=y CONFIG_GTP_CS_DELAY=y CONFIG_GTP_FOD=y CONFIG_GTP_KBUILD_SYMBOL=y CONFIG_GTP_LAST_TIME=y CONFIG_GTP_MULTI_CONFIG=y CONFIG_GTP_USE_MMI_INFO=y CONFIG_ILI_DEBUG_INFO=y CONFIG_ILITEK_CHARGER=y CONFIG_ILITEK_FW_MULTI_CHIP=y CONFIG_ILITEK_MTK_CHECK_PANEL=y CONFIG_ILITEK_RESUME_BY_DDI=y CONFIG_ILITEK_STOWED_MODE_SUPPORT=y CONFIG_ILI_TOUCH_COMPATIBILITY=y CONFIG_ILI_TOUCH_LAST_TIME=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_CHIPONE_IC_NAME=icnl9922c CONFIG_INPUT_FOCAL_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_GTX_MTK_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_INPUT_HIMAX_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_ILI_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_ILI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_ILI_SET_TOUCH_STATE=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_NOVA_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_NOVA_MULTI_SUPPLIER=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_NOVA_CHECK_DEVICE_BOOTMODE=y CONFIG_NOVA_CS_SETUP_TIME=500 CONFIG_NOVA_LOG_CAPTURE=y CONFIG_NOVA_MTK_CHECK_PANEL=y CONFIG_NOVATEK_CS_SETUP=y CONFIG_NOVA_TOUCH_LAST_TIME=y CONFIG_NVT_LCM_ESD_NOTIFIER=y CONFIG_STOWED_MODE_SUPPORT=y CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_TOUCHSCREEN_GOODIX_TIMING=y HIMAX_CONFIG_KALLSYMS_ALL=y KCFLAGS="-Wno-error -DMTK_ERALY_NOTIFY_TP_EVENT_BLANK=-1 -DMTK_DISP_EARLY_BLANK_POWERDOWN=-1 -DMTK_NOTIFY_TP_EVENT_BLANK=-1 -DMTK_DISP_EARLY_BLANK_UNBLANK=-1" ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/nova_0flash_mmi_v3
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/ilitek_tddi_v3 AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS=${ROOT_DIR}/../motorola/kernel/modules/drivers/sensors/Module.symvers CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_CHIPONE_CHECK_DEVICE_BOOTMODE=y CONFIG_CHIPONE_MTK_CHECK_PANEL=y CONFIG_CTS_INPUT_ENABLE_DOUBLE_TAP=y CONFIG_CTS_LAST_TIME=y CONFIG_CTS_NOTIFY_TOUCH_STATE=y CONFIG_ENABLE_TP_TM_ILI_LOG_CAPTURE=y CONFIG_FOCALTECH_CS_SETUP=y CONFIG_FOCALTECH_LOG_CAPTURE=y CONFIG_FOCALTECH_TOUCH_IC_NAME=ft3683g CONFIG_FTS_CHECK_DEVICE_BOOTMODE_SUPPORT=y CONFIG_FTS_COMPATIBLE_WITH_GKI=y CONFIG_FTS_DOUBLE_TAP_CONTROL=y CONFIG_FTS_INPUT_ID=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_FTS_LAST_TIME=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_POWER_PMU_CONTROL=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_FTS_SUPPORT_HIGH_RESOLUTION=y CONFIG_GOODIX_CHG_DETECTION=y CONFIG_GTP_CS_DELAY=y CONFIG_GTP_FOD=y CONFIG_GTP_KBUILD_SYMBOL=y CONFIG_GTP_LAST_TIME=y CONFIG_GTP_MULTI_CONFIG=y CONFIG_GTP_USE_MMI_INFO=y CONFIG_ILI_DEBUG_INFO=y CONFIG_ILITEK_CHARGER=y CONFIG_ILITEK_FW_MULTI_CHIP=y CONFIG_ILITEK_MTK_CHECK_PANEL=y CONFIG_ILITEK_RESUME_BY_DDI=y CONFIG_ILITEK_STOWED_MODE_SUPPORT=y CONFIG_ILI_TOUCH_COMPATIBILITY=y CONFIG_ILI_TOUCH_LAST_TIME=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_CHIPONE_IC_NAME=icnl9922c CONFIG_INPUT_FOCAL_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_GTX_MTK_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_INPUT_HIMAX_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME_D=hx83102d CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83102 CONFIG_INPUT_HIMAX_V2_MMI_IC_NAME=hx83112 CONFIG_INPUT_ILI_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_ILI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_ILI_SET_TOUCH_STATE=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_TOUCHSCREEN_GOODIX_TIMING=y HIMAX_CONFIG_KALLSYMS_ALL=y ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/ilitek_tddi_v3
+
+make -j96 O=${OUT_DIR} LLVM=1 LLVM_IAS=1 DEPMOD=depmod DTC=${OUT_DIR}/scripts/dtc/dtc M=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_u_mmi AUTOCONF_H=${OUT_DIR}/include/generated/autoconf.h KBUILD_EXTRA_SYMBOLS="${ROOT_DIR}/../motorola/kernel/modules/drivers/mmi_info/Module.symvers ${ROOT_DIR}/../motorola/kernel/modules/drivers/drivers/input/touchscreen/touchscreen_u_mmi/Module.symvers" CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y CONFIG_CHIPONE_CHECK_DEVICE_BOOTMODE=y CONFIG_CHIPONE_MTK_CHECK_PANEL=y CONFIG_CTS_INPUT_ENABLE_DOUBLE_TAP=y CONFIG_CTS_LAST_TIME=y CONFIG_CTS_NOTIFY_TOUCH_STATE=y CONFIG_FOCALTECH_CS_SETUP=y CONFIG_FOCALTECH_LOG_CAPTURE=y CONFIG_FOCALTECH_TOUCH_IC_NAME=ft3683g CONFIG_FTS_CHECK_DEVICE_BOOTMODE_SUPPORT=y CONFIG_FTS_COMPATIBLE_WITH_GKI=y CONFIG_FTS_DOUBLE_TAP_CONTROL=y CONFIG_FTS_INPUT_ID=y CONFIG_FTS_IRQ_DIS_FOR_RESET=y CONFIG_FTS_LAST_TIME=y CONFIG_FTS_MTK_CHECK_PANEL=y CONFIG_FTS_POWER_PMU_CONTROL=y CONFIG_FTS_STOWED_MODE_SUPPORT=y CONFIG_FTS_SUPPORT_HIGH_RESOLUTION=y CONFIG_GTP_CS_DELAY=y CONFIG_GTP_FOD=y CONFIG_GTP_KBUILD_SYMBOL=y CONFIG_GTP_LAST_TIME=y CONFIG_GTP_MULTI_CONFIG=y CONFIG_GTP_USE_MMI_INFO=y CONFIG_INPUT_CHIPONE_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_CHIPONE_IC_NAME=icnl9922c CONFIG_INPUT_FOCAL_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_0FLASH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_0FLASH_MMI_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_DEBUG_EN=y CONFIG_INPUT_FOCALTECH_ESD_EN=y CONFIG_INPUT_FOCALTECH_IC_NAME=ft3683g CONFIG_INPUT_FOCALTECH_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_ENABLE_DOUBLE_TAP=y CONFIG_INPUT_FOCALTECH_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V2_MMI_IC_NAME=ft3683g CONFIG_INPUT_FTS_MTK_V3_MMI_IC_NAME=ft3683g CONFIG_INPUT_HIGH_RESOLUTION_4=y CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y CONFIG_INPUT_TOUCHSCREEN_MMI=y CONFIG_MTK_PANEL_NOTIFICATIONS=y CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y CONFIG_TOUCHSCREEN_GOODIX_TIMING=y ANDROID_BUILD_TOP=$ROOT_DIR/.. TOP=$ROOT_DIR/.. KERNEL_DIR_PATH=kernel-5.15 src=${ROOT_DIR}/../motorola/kernel/modules/drivers/input/touchscreen/goodix_berlin_u_mmi
